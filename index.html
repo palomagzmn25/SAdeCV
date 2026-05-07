@@ -3,1572 +3,1529 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generador de Instrumentos Notariales — Notaría 149 EdoMéx</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<title>Notaría 149 — Sistema de Instrumentos Notariales</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/pizzip@3.1.7/dist/pizzip.js"></script>
+<script src="https://unpkg.com/docxtemplater@3.53.0/build/docxtemplater.js"></script>
 <style>
-:root{
-  --ink:#1a1410;
-  --ink-soft:#3d3530;
-  --paper:#f4efe6;
-  --paper-deep:#ebe3d4;
-  --accent:#7a1f1f;
-  --accent-deep:#5a1414;
-  --gold:#a07b2c;
-  --rule:#cbbfa8;
-  --shadow: 0 1px 0 rgba(26,20,16,.06), 0 8px 24px rgba(26,20,16,.08);
-  --serif: 'EB Garamond', 'Iowan Old Style', Georgia, serif;
-  --sans: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
-}
-
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
-body{
-  background-image:
-    radial-gradient(circle at 10% 0%, rgba(160,123,44,.05) 0%, transparent 40%),
-    radial-gradient(circle at 90% 100%, rgba(122,31,31,.04) 0%, transparent 40%);
-  min-height:100vh;
-}
-
-/* HEADER */
-header.notarial{
-  background:var(--ink);color:var(--paper);
-  padding:28px 40px;
-  border-bottom:6px double var(--gold);
-  position:relative;
-}
-header.notarial::before{
-  content:'';position:absolute;inset:6px;border:1px solid rgba(244,239,230,.12);pointer-events:none;
-}
-header.notarial .crest{
-  display:flex;align-items:center;gap:24px;justify-content:space-between;flex-wrap:wrap;
-}
-header.notarial h1{
-  font-family:var(--serif);font-weight:600;font-size:28px;letter-spacing:.5px;line-height:1.1;
-}
-header.notarial h1 .ornament{color:var(--gold);font-style:italic;font-weight:400}
-header.notarial p.sub{
-  font-family:var(--serif);font-style:italic;font-size:15px;color:rgba(244,239,230,.75);margin-top:6px;
-}
-header.notarial .brand{
-  font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);
-}
-header.notarial .seal{
-  width:78px;height:78px;border:2px solid var(--gold);border-radius:50%;
-  display:flex;align-items:center;justify-content:center;flex-direction:column;
-  font-family:var(--serif);color:var(--gold);text-align:center;
-  position:relative;flex-shrink:0;
-}
-header.notarial .seal::before{
-  content:'';position:absolute;inset:4px;border:1px dashed rgba(160,123,44,.5);border-radius:50%;
-}
-header.notarial .seal .num{font-size:22px;font-weight:700;line-height:1}
-header.notarial .seal .lbl{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
-
-/* TABS */
-.tabs{
-  background:var(--paper-deep);border-bottom:1px solid var(--rule);
-  padding:0 40px;display:flex;gap:0;
-  position:sticky;top:0;z-index:50;box-shadow:0 1px 0 rgba(26,20,16,.04);
-}
-.tab{
-  font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;
-  background:transparent;border:none;color:var(--ink-soft);
-  padding:14px 22px;cursor:pointer;
-  border-bottom:2px solid transparent;
-  transition:all .15s;
-  position:relative;
-}
-.tab:hover{color:var(--ink)}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
-.tab .badge{
-  display:inline-block;background:var(--accent);color:var(--paper);
-  font-size:9px;padding:1px 6px;border-radius:8px;margin-left:6px;font-weight:600;
-}
-
-/* LAYOUT */
-.shell{
-  max-width:1280px;margin:0 auto;padding:32px 40px 80px;
-  display:grid;grid-template-columns:1fr 360px;gap:32px;
-}
-@media(max-width:1100px){.shell{grid-template-columns:1fr;padding:24px}}
-
-/* FORMS */
-.form-pane h2.section{
-  font-family:var(--serif);font-size:22px;font-weight:600;
-  color:var(--accent-deep);
-  margin:36px 0 14px;padding-bottom:6px;
-  border-bottom:1px solid var(--rule);
-  display:flex;align-items:baseline;gap:10px;
-}
-.form-pane h2.section::before{
-  content:attr(data-num);font-family:var(--mono);font-size:11px;
-  color:var(--gold);letter-spacing:2px;
-}
-.form-pane h2.section:first-of-type{margin-top:0}
-
-.fieldset{
-  background:rgba(255,253,248,.7);border:1px solid var(--rule);
-  border-radius:2px;padding:18px 20px;margin-bottom:14px;
-  box-shadow:var(--shadow);
-}
-.fieldset.socio{
-  border-left:3px solid var(--accent);
-  position:relative;
-}
-.fieldset.socio .socio-header{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:14px;padding-bottom:10px;border-bottom:1px dashed var(--rule);
-}
-.fieldset.socio h3{
-  font-family:var(--serif);font-size:18px;font-weight:600;color:var(--accent-deep);
-}
-.fieldset.socio h3 .roman{color:var(--gold);font-style:italic;margin-right:6px}
-
-.grid{display:grid;gap:12px}
-.grid.cols-2{grid-template-columns:1fr 1fr}
-.grid.cols-3{grid-template-columns:1fr 1fr 1fr}
-@media(max-width:600px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr}}
-
-.field{display:flex;flex-direction:column;gap:4px}
-.field.span-2{grid-column:span 2}
-.field.span-full{grid-column:1/-1}
-.field label{
-  font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--ink-soft);font-weight:500;
-}
-.field input,.field textarea,.field select{
-  font-family:var(--serif);font-size:15px;
-  background:#fffefa;color:var(--ink);
-  border:1px solid var(--rule);border-radius:1px;
-  padding:8px 10px;
-  transition:border-color .15s, box-shadow .15s;
-  width:100%;
-}
-.field input:focus,.field textarea:focus,.field select:focus{
-  outline:none;border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(122,31,31,.08);
-}
-.field textarea{min-height:96px;resize:vertical;line-height:1.5}
-.field .hint{font-size:11px;color:var(--ink-soft);font-style:italic;font-family:var(--serif)}
-
-/* BUTTONS */
-.btn{
-  font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:500;
-  padding:9px 16px;border:1px solid var(--ink);background:transparent;color:var(--ink);
-  cursor:pointer;border-radius:1px;
-  transition:all .15s;
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-}
-.btn:hover{background:var(--ink);color:var(--paper)}
-.btn.primary{background:var(--accent);color:var(--paper);border-color:var(--accent)}
-.btn.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
-.btn.ghost{border-color:var(--rule);color:var(--ink-soft)}
-.btn.ghost:hover{background:var(--paper-deep);color:var(--ink);border-color:var(--ink-soft)}
-.btn.danger{border-color:var(--accent);color:var(--accent)}
-.btn.danger:hover{background:var(--accent);color:var(--paper)}
-.btn.gold{background:var(--gold);color:var(--ink);border-color:var(--gold)}
-.btn.gold:hover{background:#8a6a25;border-color:#8a6a25;color:var(--paper)}
-.btn.small{padding:5px 10px;font-size:9.5px}
-.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-
-/* SIDEBAR */
-.actions-pane{position:sticky;top:60px;align-self:start}
-.actions-card{
-  background:#fffefa;border:1px solid var(--rule);border-radius:2px;
-  padding:24px;box-shadow:var(--shadow);
-}
-.actions-card h3{
-  font-family:var(--serif);font-size:18px;font-weight:600;color:var(--accent-deep);
-  margin-bottom:4px;
-}
-.actions-card p.lead{
-  font-family:var(--serif);font-style:italic;font-size:13px;color:var(--ink-soft);margin-bottom:16px;
-}
-.actions-card .big-btn{
-  width:100%;padding:14px;font-size:12px;letter-spacing:2.5px;
-  margin-bottom:8px;
-}
-.actions-card hr{border:0;border-top:1px solid var(--rule);margin:16px 0}
-
-.totals{
-  background:var(--paper-deep);padding:12px 14px;border-radius:1px;margin-top:8px;
-  font-family:var(--mono);font-size:11px;
-}
-.totals .row{display:flex;justify-content:space-between;padding:3px 0}
-.totals .row.total{border-top:1px solid var(--ink);margin-top:6px;padding-top:6px;font-weight:600}
-
-/* MODAL */
-.modal{
-  display:none;position:fixed;inset:0;background:rgba(26,20,16,.7);z-index:200;
-  align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;
-  backdrop-filter:blur(4px);
-}
-.modal.show{display:flex}
-.modal-inner{
-  background:#fdfaf3;max-width:920px;width:100%;
-  border:1px solid var(--rule);box-shadow:0 20px 60px rgba(0,0,0,.4);
-}
-.modal-header{
-  padding:16px 24px;border-bottom:1px solid var(--rule);
-  display:flex;justify-content:space-between;align-items:center;
-  background:var(--ink);color:var(--paper);
-  position:sticky;top:0;z-index:1;
-}
-.modal-header h3{font-family:var(--serif);font-size:18px;font-weight:600}
-.modal-body{
-  padding:48px 64px;
-  font-family:var(--serif);font-size:14px;line-height:1.85;
-  white-space:pre-wrap;
-  color:var(--ink);
-  text-align:justify;
-  hyphens:auto;
-}
-@media(max-width:700px){.modal-body{padding:24px}}
-.close-x{
-  background:transparent;border:1px solid rgba(244,239,230,.3);color:var(--paper);
-  width:30px;height:30px;cursor:pointer;font-size:18px;
-}
-.close-x:hover{background:var(--accent)}
-
-/* TOAST */
-.toast{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);
-  background:var(--ink);color:var(--paper);padding:12px 24px;border-radius:1px;
-  font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
-  box-shadow:0 10px 30px rgba(0,0,0,.3);
-  border-left:3px solid var(--gold);
-  transition:transform .3s ease;z-index:300;
-}
-.toast.show{transform:translateX(-50%) translateY(0)}
-
-/* EXPEDIENTES */
-.expediente-toolbar{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--rule);
-  flex-wrap:wrap;gap:12px;
-}
-.expediente-toolbar h2{
-  font-family:var(--serif);font-size:24px;font-weight:600;color:var(--accent-deep);
-}
-.expediente-toolbar .search{
-  font-family:var(--serif);font-size:14px;
-  background:#fffefa;border:1px solid var(--rule);padding:8px 14px;
-  width:280px;max-width:100%;
-}
-.expediente-toolbar .search:focus{outline:none;border-color:var(--accent)}
-
-.expediente-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;
-}
-.exp-card{
-  background:#fffefa;border:1px solid var(--rule);
-  padding:18px 20px;position:relative;
-  border-left:3px solid var(--gold);
-  box-shadow:var(--shadow);
-  transition:transform .15s, box-shadow .15s;
-  cursor:pointer;
-}
-.exp-card:hover{
-  transform:translateY(-2px);
-  box-shadow:0 4px 12px rgba(26,20,16,.12);
-  border-left-color:var(--accent);
-}
-.exp-card.protocolizado{border-left-color:#2d5e2d;background:rgba(45,94,45,.03)}
-.exp-card .exp-title{
-  font-family:var(--serif);font-size:18px;font-weight:600;color:var(--accent-deep);
-  margin-bottom:4px;line-height:1.2;
-  word-break:break-word;
-}
-.exp-card .exp-meta{
-  font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;
-  color:var(--ink-soft);margin-bottom:10px;
-}
-.exp-card .exp-meta .sep{color:var(--gold);margin:0 6px}
-.exp-card .exp-info{
-  font-family:var(--serif);font-size:13px;color:var(--ink-soft);line-height:1.5;
-  margin-bottom:12px;
-}
-.exp-card .exp-info strong{color:var(--ink);font-weight:600}
-.exp-card .exp-actions{
-  display:flex;gap:6px;flex-wrap:wrap;
-  border-top:1px dashed var(--rule);padding-top:12px;
-}
-.exp-card .status-pill{
-  display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:1.2px;
-  padding:2px 8px;background:var(--gold);color:var(--ink);text-transform:uppercase;
-  margin-left:6px;
-}
-.exp-card.protocolizado .status-pill{background:#2d5e2d;color:var(--paper)}
-
-.empty-state{
-  text-align:center;padding:80px 20px;
-  font-family:var(--serif);color:var(--ink-soft);
-}
-.empty-state .ornament{
-  font-size:48px;color:var(--gold);font-style:italic;margin-bottom:16px;
-}
-.empty-state h3{
-  font-size:22px;font-weight:600;color:var(--ink);margin-bottom:8px;
-}
-.empty-state p{font-style:italic;font-size:15px;max-width:480px;margin:0 auto 20px}
-
-details.help{
-  margin-bottom:16px;background:rgba(160,123,44,.08);
-  border-left:3px solid var(--gold);padding:10px 14px;
-}
-details.help summary{
-  cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
-  color:var(--ink-soft);
-}
-details.help[open] summary{margin-bottom:8px}
-details.help p{font-family:var(--serif);font-size:13px;line-height:1.6;color:var(--ink-soft)}
-details.help p+p{margin-top:6px}
-
-.tab-content{display:none}
-.tab-content.active{display:block}
-
-.unsaved-banner{
-  background:rgba(160,123,44,.15);border:1px solid var(--gold);
-  padding:10px 16px;margin-bottom:16px;font-family:var(--serif);font-size:13px;
-  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
-}
-.unsaved-banner .label{color:var(--ink)}
-.unsaved-banner .label strong{font-weight:600}
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+  .sidebar-link { display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:14px;font-weight:500;color:#6b7280;cursor:pointer;transition:all .15s; }
+  .sidebar-link:hover { background:#f3f4f6;color:#111827; }
+  .sidebar-link.active { background:#eff6ff;color:#1d4ed8; }
+  .card { background:white;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .btn { display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;border:none;outline:none; }
+  .btn-primary { background:#2563eb;color:white; }
+  .btn-primary:hover { background:#1d4ed8; }
+  .btn-primary:disabled { background:#93c5fd;cursor:not-allowed; }
+  .btn-secondary { background:#f3f4f6;color:#374151; }
+  .btn-secondary:hover { background:#e5e7eb; }
+  .btn-danger { background:#fee2e2;color:#dc2626; }
+  .btn-danger:hover { background:#fecaca; }
+  .btn-success { background:#dcfce7;color:#16a34a; }
+  .btn-success:hover { background:#bbf7d0; }
+  .form-group { margin-bottom:16px; }
+  .form-label { display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:6px; }
+  .form-label.required::after { content:" *";color:#dc2626; }
+  .form-input { width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;font-size:14px;color:#111827;outline:none;transition:border-color .15s;box-sizing:border-box; }
+  .form-input:focus { border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+  .form-input.error { border-color:#dc2626; }
+  .form-select { width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;font-size:14px;color:#111827;outline:none;background:white;cursor:pointer;box-sizing:border-box; }
+  .form-select:focus { border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+  .form-textarea { width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;font-size:14px;color:#111827;outline:none;resize:vertical;box-sizing:border-box; }
+  .form-textarea:focus { border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+  .tab-btn { padding:8px 16px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;border:none;background:transparent;color:#6b7280; }
+  .tab-btn.active { background:#eff6ff;color:#1d4ed8; }
+  .badge { display:inline-flex;align-items:center;padding:2px 10px;border-radius:9999px;font-size:12px;font-weight:500; }
+  .badge-blue { background:#dbeafe;color:#1d4ed8; }
+  .badge-green { background:#dcfce7;color:#15803d; }
+  .badge-yellow { background:#fef9c3;color:#854d0e; }
+  .badge-gray { background:#f3f4f6;color:#374151; }
+  .badge-red { background:#fee2e2;color:#dc2626; }
+  .badge-purple { background:#f3e8ff;color:#7e22ce; }
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px; }
+  .modal { background:white;border-radius:16px;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,.2); }
+  .alert { padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px; }
+  .alert-error { background:#fee2e2;color:#dc2626;border:1px solid #fecaca; }
+  .alert-success { background:#dcfce7;color:#15803d;border:1px solid #bbf7d0; }
+  .alert-warning { background:#fef9c3;color:#854d0e;border:1px solid #fef08a; }
+  .table-row:hover { background:#f9fafb; }
+  #toast { position:fixed;bottom:24px;right:24px;z-index:100;pointer-events:none; }
+  .toast-item { background:#1f2937;color:white;padding:12px 20px;border-radius:10px;font-size:14px;margin-top:8px;box-shadow:0 10px 25px rgba(0,0,0,.2);opacity:0;transform:translateY(20px);transition:all .3s; }
+  .toast-item.show { opacity:1;transform:translateY(0); }
+  .spinner { display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .drop-zone { border:2px dashed #d1d5db;border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:all .15s; }
+  .drop-zone:hover,.drop-zone.dragover { border-color:#2563eb;background:#eff6ff; }
+  .socio-card { border:1px solid #e5e7eb;border-radius:12px;overflow:hidden; }
+  .socio-header { padding:14px 16px;background:#f9fafb;display:flex;align-items:center;justify-content:space-between;cursor:pointer; }
+  .socio-body { padding:20px;display:none; }
+  .socio-body.open { display:block; }
+  .grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
+  .grid-3 { display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px; }
+  @media(max-width:640px) { .grid-2,.grid-3 { grid-template-columns:1fr; } }
+  .section-title { font-size:13px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f3f4f6; }
 </style>
 </head>
-<body>
+<body class="bg-gray-50 min-h-screen">
 
-<header class="notarial">
-  <div class="crest">
-    <div>
-      <div class="brand">Notaría Pública 149 — Estado de México</div>
-      <h1>Generador de Instrumentos Notariales <span class="ornament">·</span> S.A. de C.V.</h1>
-      <p class="sub">Constitución de Sociedad Anónima de Capital Variable — Lic. José Manuel Gómez del Campo Gurza</p>
+<!-- Toast container -->
+<div id="toast"></div>
+
+<!-- Login Page -->
+<div id="page-login" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+  <div class="card p-8 w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-900">Notaría 149</h1>
+      <p class="text-gray-500 text-sm mt-1">Sistema de Instrumentos Notariales</p>
     </div>
-    <div class="seal">
-      <span class="num">149</span>
-      <span class="lbl">EdoMéx</span>
+    <div id="login-error" class="alert alert-error hidden"></div>
+    <div class="form-group">
+      <label class="form-label required">Correo electrónico</label>
+      <input id="login-email" type="email" class="form-input" placeholder="usuario@notaria149.mx" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label required">Contraseña</label>
+      <input id="login-pass" type="password" class="form-input" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button onclick="doLogin()" class="btn btn-primary w-full justify-center text-base py-2.5" id="login-btn">
+      Iniciar sesión
+    </button>
+    <div class="mt-6 p-4 bg-gray-50 rounded-lg text-xs text-gray-500">
+      <p class="font-medium text-gray-700 mb-2">Credenciales de acceso:</p>
+      <p>admin@notaria149.mx · Admin@Notaria2024</p>
+      <p>capturista@notaria149.mx · Capturista@2024</p>
+      <p>consulta@notaria149.mx · Consulta@2024</p>
     </div>
   </div>
-</header>
+</div>
 
-<nav class="tabs">
-  <button class="tab active" data-tab="form" onclick="switchTab('form')">Nuevo Instrumento</button>
-  <button class="tab" data-tab="expedientes" onclick="switchTab('expedientes')">Expedientes <span class="badge" id="expCount">0</span></button>
-</nav>
-
-<!-- ============== TAB: NUEVO INSTRUMENTO ============== -->
-<div class="tab-content active" id="tab-form">
-<div class="shell">
-
-  <main class="form-pane">
-
-    <div id="loadedBanner" class="unsaved-banner" style="display:none">
-      <span class="label">Editando expediente: <strong id="loadedName">—</strong></span>
-      <button class="btn small ghost" onclick="newExpediente()">Crear nuevo</button>
-    </div>
-
-    <details class="help">
-      <summary>¿Cómo funciona?</summary>
-      <p>Captura los datos del cliente. El sistema genera el instrumento conforme al machote oficial de la Notaría 149 (sólo se sustituyen los campos variables; la estructura textual permanece intacta).</p>
-      <p>Las fechas, cantidades, CURP y RFC se convierten automáticamente a su forma escrita en letra. Al terminar, presiona <strong>Vista Previa</strong> o <strong>Descargar Word</strong>.</p>
-      <p>Para conservar el expediente en este equipo y reutilizarlo después, presiona <strong>Guardar Expediente</strong>. Lo encontrarás en la pestaña «Expedientes».</p>
-    </details>
-
-    <h2 class="section" data-num="I">Datos del Instrumento</h2>
-    <div class="fieldset">
-      <div class="grid cols-3">
-        <div class="field"><label>Número de Instrumento</label><input id="numInstrumento" placeholder="Ej. 12,345"></div>
-        <div class="field"><label>Número de Volumen</label><input id="numVolumen" placeholder="Ej. 678"></div>
-        <div class="field"><label>Número de Folios</label><input id="numFolios" placeholder="Ej. 32,150 al 32,165"></div>
-        <div class="field"><label>Día (número)</label><input id="dia" type="number" min="1" max="31" placeholder="15"></div>
-        <div class="field"><label>Mes</label>
-          <select id="mes">
-            <option value="">— seleccionar —</option>
-            <option>enero</option><option>febrero</option><option>marzo</option><option>abril</option>
-            <option>mayo</option><option>junio</option><option>julio</option><option>agosto</option>
-            <option>septiembre</option><option>octubre</option><option>noviembre</option><option>diciembre</option>
-          </select>
+<!-- Main App -->
+<div id="page-app" class="hidden flex min-h-screen">
+  <!-- Sidebar -->
+  <aside class="w-56 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 left-0 z-10">
+    <div class="p-5 border-b border-gray-200">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         </div>
-        <div class="field"><label>Año (número)</label><input id="anio" type="number" min="2000" max="2100" placeholder="2026"></div>
-      </div>
-    </div>
-
-    <h2 class="section" data-num="II">Denominación y CUD</h2>
-    <div class="fieldset">
-      <div class="grid cols-2">
-        <div class="field span-2"><label>Nombre de la Empresa (sin S.A. de C.V.)</label>
-          <input id="empresa" placeholder="Ej. CONSULTORÍA INTEGRAL HERRERA">
-          <span class="hint">Solo el nombre distintivo. La fórmula "S.A. de C.V." se agrega automáticamente.</span>
-        </div>
-        <div class="field"><label>Clave Única del Documento (CUD)</label><input id="cud" placeholder="A202612345"></div>
-        <div class="field"><label>Fecha de Expedición de la CUD</label><input id="fechaCud" type="date"></div>
-      </div>
-    </div>
-
-    <h2 class="section" data-num="III">Datos Societarios</h2>
-    <div class="fieldset">
-      <div class="grid cols-2">
-        <div class="field"><label>Duración de la Sociedad</label><input id="duracion" placeholder="Ej. noventa y nueve años"></div>
-        <div class="field"><label>Ciudad y Estado del Domicilio Social</label><input id="ciudadEstado" placeholder="Ej. Toluca, Estado de México"></div>
-        <div class="field span-2"><label>Objeto Social (descripción completa)</label>
-          <textarea id="objeto" placeholder="Describe íntegramente el o los objetos de la sociedad..."></textarea>
+        <div>
+          <p class="font-bold text-gray-900 text-sm leading-tight">Notaría 149</p>
+          <p class="text-xs text-gray-500">Estado de México</p>
         </div>
       </div>
     </div>
-
-    <h2 class="section" data-num="IV">Capital Social</h2>
-    <div class="fieldset">
-      <div class="grid cols-3">
-        <div class="field"><label>Monto Capital Social Mínimo (MXN)</label><input id="capitalMonto" type="number" placeholder="50000"></div>
-        <div class="field"><label>Total Acciones Representativas</label><input id="capitalAcciones" type="number" placeholder="50"></div>
-        <div class="field"><label>Valor Nominal por Acción (MXN)</label><input id="valorNominal" type="number" placeholder="1000"></div>
+    <nav class="p-3 flex-1 space-y-1">
+      <a onclick="navigate('dashboard')" class="sidebar-link" data-route="dashboard">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Dashboard
+      </a>
+      <a onclick="navigate('instrumentos')" class="sidebar-link" data-route="instrumentos">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Instrumentos
+      </a>
+      <a onclick="navigate('plantillas')" class="sidebar-link" data-route="plantillas">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+        Plantillas
+      </a>
+      <a onclick="navigate('usuarios')" class="sidebar-link admin-only hidden" data-route="usuarios">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        Usuarios
+      </a>
+      <a onclick="navigate('configuracion')" class="sidebar-link admin-only hidden" data-route="configuracion">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Configuración
+      </a>
+    </nav>
+    <div class="p-3 border-t border-gray-200">
+      <div id="user-info" class="flex items-center gap-2 px-2 py-2">
+        <div class="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center">
+          <span id="user-initials" class="text-xs font-bold text-blue-700"></span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p id="user-name" class="text-xs font-medium text-gray-900 truncate"></p>
+          <p id="user-role" class="text-xs text-gray-500"></p>
+        </div>
       </div>
-      <span class="hint" style="margin-top:8px;display:block">El sistema verifica que: Acciones × Valor Nominal = Capital. Las cifras se convierten a letra automáticamente.</span>
-    </div>
-
-    <h2 class="section" data-num="V">Socios / Accionistas</h2>
-    <div id="sociosContainer"></div>
-    <div class="btn-row">
-      <button class="btn primary" onclick="addSocio()">+ Agregar socio</button>
-    </div>
-
-    <h2 class="section" data-num="VI">Administración Única</h2>
-    <div class="fieldset">
-      <div class="grid cols-2">
-        <div class="field"><label>Nombre del Administrador Único</label><input id="adminNombre" placeholder="Nombre completo"></div>
-        <div class="field"><label>RFC del Administrador Único</label><input id="adminRFC" placeholder="XXXX000000XXX" maxlength="13" style="text-transform:uppercase"></div>
-      </div>
-    </div>
-
-    <h2 class="section" data-num="VII">Vigilancia (Comisario)</h2>
-    <div class="fieldset">
-      <div class="grid cols-2">
-        <div class="field"><label>Nombre del Comisario</label><input id="comisarioNombre" placeholder="Nombre completo"></div>
-        <div class="field"><label>RFC del Comisario</label><input id="comisarioRFC" placeholder="XXXX000000XXX" maxlength="13" style="text-transform:uppercase"></div>
-      </div>
-    </div>
-
-  </main>
-
-  <aside class="actions-pane">
-    <div class="actions-card">
-      <h3>Acciones</h3>
-      <p class="lead">Genera, previsualiza, guarda o descarga el instrumento.</p>
-
-      <button class="btn primary big-btn" onclick="preview()">Vista Previa</button>
-      <button class="btn gold big-btn" onclick="downloadDocx()">↓ Descargar Word</button>
-
-      <hr>
-
-      <h3 style="font-size:14px;margin-bottom:8px">Expediente</h3>
-      <button class="btn big-btn small" onclick="saveExpediente()">Guardar Expediente</button>
-      <button class="btn ghost big-btn small" onclick="newExpediente()">Nuevo / Limpiar</button>
-
-      <hr>
-
-      <div class="totals" id="totales">
-        <div class="row"><span>Socios</span><span id="tSocios">0</span></div>
-        <div class="row"><span>Acciones suscritas</span><span id="tAcciones">0</span></div>
-        <div class="row"><span>Capital cubierto</span><span id="tCapital">$0.00</span></div>
-        <div class="row total"><span>Estado</span><span id="tEstado">Pendiente</span></div>
-      </div>
+      <button onclick="doLogout()" class="sidebar-link w-full text-red-500 hover:bg-red-50 hover:text-red-600 mt-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Cerrar sesión
+      </button>
     </div>
   </aside>
-</div>
-</div>
 
-<!-- ============== TAB: EXPEDIENTES ============== -->
-<div class="tab-content" id="tab-expedientes">
-<div class="shell" style="grid-template-columns:1fr">
-
-  <main>
-    <div class="expediente-toolbar">
-      <h2>Expedientes Guardados</h2>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <input class="search" id="searchExp" placeholder="Buscar por nombre, instrumento, socio..." oninput="renderExpedientes()">
-        <button class="btn ghost small" onclick="if(confirm('¿Eliminar TODOS los expedientes guardados? Esta acción no se puede deshacer.')){ allExpedientes={}; persistAll(); renderExpedientes(); updateExpCount(); showToast('Todos los expedientes eliminados'); }">Vaciar todo</button>
-      </div>
-    </div>
-
-    <div id="expedienteList"></div>
+  <!-- Main content -->
+  <main class="ml-56 flex-1 flex flex-col min-h-screen">
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+      <div id="page-title" class="font-semibold text-gray-900"></div>
+      <div id="page-actions"></div>
+    </header>
+    <div id="content" class="flex-1 p-6"></div>
   </main>
-
-</div>
 </div>
 
-<!-- MODAL: Vista Previa -->
-<div class="modal" id="modal">
-  <div class="modal-inner">
-    <div class="modal-header">
-      <h3>Vista Previa del Instrumento</h3>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn small gold" onclick="downloadDocx()">↓ Descargar Word</button>
-        <button class="close-x" onclick="closeModal()">×</button>
-      </div>
-    </div>
-    <div class="modal-body" id="modalBody"></div>
-  </div>
-</div>
-
-<!-- MODAL: Guardar Expediente -->
-<div class="modal" id="modalSave">
-  <div class="modal-inner" style="max-width:520px">
-    <div class="modal-header">
-      <h3>Guardar Expediente</h3>
-      <button class="close-x" onclick="closeSaveModal()">×</button>
-    </div>
-    <div class="modal-body" style="padding:32px 40px">
-      <div class="field" style="margin-bottom:16px">
-        <label>Nombre del Expediente</label>
-        <input id="saveExpName" placeholder="Ej. SOCIEDAD HERRERA - Constitución 2026">
-        <span class="hint">Identifica el expediente para encontrarlo después.</span>
-      </div>
-      <div class="field" style="margin-bottom:16px">
-        <label>Notas internas (opcional)</label>
-        <textarea id="saveExpNotes" placeholder="Comentarios, recordatorios o pendientes..." style="min-height:80px"></textarea>
-      </div>
-      <div class="field" style="margin-bottom:24px">
-        <label>Estatus</label>
-        <select id="saveExpStatus">
-          <option value="borrador">Borrador</option>
-          <option value="revision">En revisión</option>
-          <option value="protocolizado">Protocolizado</option>
-        </select>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button class="btn ghost" onclick="closeSaveModal()">Cancelar</button>
-        <button class="btn primary" onclick="confirmSaveExpediente()">Guardar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
+<!-- Modal container -->
+<div id="modal-container"></div>
 
 <script>
-/* ============================================
-   GENERADOR DE INSTRUMENTOS NOTARIALES
-   Notaría Pública 149 - Estado de México
-   ============================================ */
+// ============================================================
+// UTILITIES — Números y fechas en letra (Spanish legal format)
+// ============================================================
+const UNIDADES = ['','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve'];
+const DECENAS = ['','','veinte','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'];
+const CENTENAS = ['','cien','doscientos','trescientos','cuatrocientos','quinientos','seiscientos','setecientos','ochocientos','novecientos'];
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS_LETRA = {1:'primero',2:'dos',3:'tres',4:'cuatro',5:'cinco',6:'seis',7:'siete',8:'ocho',9:'nueve',10:'diez',11:'once',12:'doce',13:'trece',14:'catorce',15:'quince',16:'dieciséis',17:'diecisiete',18:'dieciocho',19:'diecinueve',20:'veinte',21:'veintiuno',22:'veintidós',23:'veintitrés',24:'veinticuatro',25:'veinticinco',26:'veintiséis',27:'veintisiete',28:'veintiocho',29:'veintinueve',30:'treinta',31:'treinta y uno'};
 
-const STORAGE_KEY = 'notaria149_expedientes_v2';
-let socios = [];
-let allExpedientes = {};
-let currentExpedienteId = null;
-
-/* ========= STORAGE PERSISTENTE ========= */
-async function loadAllExpedientes(){
-  try{
-    if(typeof window.storage !== 'undefined' && window.storage){
-      const result = await window.storage.get(STORAGE_KEY);
-      if(result && result.value){
-        allExpedientes = JSON.parse(result.value);
-      }
-    } else {
-      // Fallback en sessionStorage si no existe window.storage
-      const v = window.sessionStorage.getItem(STORAGE_KEY);
-      if(v) allExpedientes = JSON.parse(v);
-    }
-  }catch(e){
-    console.warn('No previous storage:', e);
-    allExpedientes = {};
+function convertirMenorMil(n) {
+  if (n === 0) return '';
+  if (n < 20) return UNIDADES[n];
+  if (n < 100) {
+    const d = Math.floor(n/10), u = n%10;
+    if (u === 0) return DECENAS[d];
+    if (d === 2) return 'veinti' + UNIDADES[u];
+    return DECENAS[d] + ' y ' + UNIDADES[u];
   }
+  const c = Math.floor(n/100), r = n%100;
+  if (n === 100) return 'cien';
+  if (c === 1) return r === 0 ? 'cien' : 'ciento ' + convertirMenorMil(r);
+  return CENTENAS[c] + (r > 0 ? ' ' + convertirMenorMil(r) : '');
 }
 
-async function persistAll(){
-  try{
-    const json = JSON.stringify(allExpedientes);
-    if(typeof window.storage !== 'undefined' && window.storage){
-      await window.storage.set(STORAGE_KEY, json);
-    } else {
-      window.sessionStorage.setItem(STORAGE_KEY, json);
-    }
-  }catch(e){
-    console.error('Error persisting:', e);
-    showToast('Error al guardar');
-  }
-}
-
-function updateExpCount(){
-  const n = Object.keys(allExpedientes).length;
-  document.getElementById('expCount').textContent = n;
-}
-
-/* ========= TABS ========= */
-function switchTab(name){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
-  document.querySelectorAll('.tab-content').forEach(c=>c.classList.toggle('active', c.id==='tab-'+name));
-  if(name==='expedientes') renderExpedientes();
-}
-
-/* ========= CONVERTIDORES A LETRA ========= */
-function numToLetra(n){
-  if(n===null||n===undefined||n==='') return '';
-  n = parseInt(n);
-  if(isNaN(n)) return '';
-  if(n===0) return 'cero';
-  if(n<0) return 'menos '+numToLetra(-n);
-
-  const u=['','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve'];
-  const e=['diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve'];
-  const d=['','','veinte','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'];
-  const c=['','ciento','doscientos','trescientos','cuatrocientos','quinientos','seiscientos','setecientos','ochocientos','novecientos'];
-
-  function bajo100(n){
-    if(n<10) return u[n];
-    if(n<20) return e[n-10];
-    if(n<30){
-      if(n===20) return 'veinte';
-      return 'veinti'+u[n-20];
-    }
-    const dec=Math.floor(n/10), un=n%10;
-    return d[dec]+(un?' y '+u[un]:'');
-  }
-  function bajo1000(n){
-    if(n<100) return bajo100(n);
-    if(n===100) return 'cien';
-    const cent=Math.floor(n/100), resto=n%100;
-    return c[cent]+(resto?' '+bajo100(resto):'');
-  }
-  function bajoMillon(n){
-    if(n<1000) return bajo1000(n);
-    const miles=Math.floor(n/1000), resto=n%1000;
-    let out='';
-    if(miles===1) out='mil';
-    else out=bajo1000(miles)+' mil';
-    if(resto) out+=' '+bajo1000(resto);
-    return out;
-  }
-  if(n<1000000) return bajoMillon(n);
-  const millones=Math.floor(n/1000000), resto=n%1000000;
-  let out=millones===1?'un millón':bajoMillon(millones)+' millones';
-  if(resto) out+=' '+bajoMillon(resto);
-  return out;
-}
-
-function fechaToLetra(dateStr){
-  if(!dateStr) return '';
-  const [y,m,d]=dateStr.split('-').map(Number);
-  if(!y||!m||!d) return '';
-  const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  return `${numToLetra(d)} de ${meses[m-1]} de ${numToLetra(y)}`;
-}
-
-function diaToLetra(d){if(!d) return '';return numToLetra(parseInt(d));}
-function anioToLetra(a){if(!a) return '';return numToLetra(parseInt(a));}
-
-function desglosar(s){
-  if(!s) return '';
-  s = s.toString().toUpperCase().replace(/\s+/g,'');
-  const digitos={'0':'cero','1':'uno','2':'dos','3':'tres','4':'cuatro','5':'cinco','6':'seis','7':'siete','8':'ocho','9':'nueve'};
-  const out=[];
-  for(const ch of s){
-    if(digitos[ch]) out.push(digitos[ch]);
-    else if(/[A-ZÑ]/.test(ch)) out.push(ch);
-    else if(ch!=='') out.push(ch);
-  }
-  return out.join(', ');
-}
-
-function fmtMoneda(n){
-  if(n===null||n===undefined||n==='') return '$0.00';
-  return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(n);
-}
-
-function toRoman(num){
-  const map=[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
-  let r='';for(const[v,s]of map){while(num>=v){r+=s;num-=v;}}return r;
-}
-
-/* ========= SOCIOS ========= */
-function addSocio(data){
-  const idx=socios.length;
-  const s = data || {
-    id:Date.now()+idx+Math.random(),
-    nombre:'',
-    nacionalidad:'mexicana',
-    nacPadres:'mexicanos',
-    lugarOrigen:'',
-    fechaNac:'',
-    estadoCivil:'',
-    profesion:'',
-    domicilio:'',
-    tipoIdent:'Credencial para Votar vigente expedida por el Instituto Nacional Electoral',
-    detalleIdent:'',
-    curp:'',
-    rfc:'',
-    acciones:'',
-    importe:''
-  };
-  socios.push(s);
-  renderSocios();
-}
-
-function removeSocio(id){
-  socios = socios.filter(s=>s.id!==id);
-  renderSocios();
-}
-
-function updateSocio(id,field,value){
-  const s=socios.find(s=>s.id===id);
-  if(!s) return;
-  s[field]=value;
-  if(field==='acciones'){
-    const vn=parseFloat(document.getElementById('valorNominal').value)||0;
-    const ac=parseFloat(value)||0;
-    if(vn>0&&ac>0){
-      s.importe=ac*vn;
-      const inp=document.querySelector(`[data-sid="${id}"][data-field="importe"]`);
-      if(inp) inp.value=s.importe;
-    }
-  }
-  updateTotals();
-}
-
-function renderSocios(){
-  const container=document.getElementById('sociosContainer');
-  container.innerHTML='';
-  socios.forEach((s,i)=>{
-    const div=document.createElement('div');
-    div.className='fieldset socio';
-    div.innerHTML=`
-      <div class="socio-header">
-        <h3><span class="roman">${toRoman(i+1)}</span> Socio ${i+1}</h3>
-        <button class="btn danger small" onclick="removeSocio(${s.id})">Eliminar</button>
-      </div>
-      <div class="grid cols-2">
-        <div class="field span-2"><label>Nombre Completo</label>
-          <input value="${esc(s.nombre)}" oninput="updateSocio(${s.id},'nombre',this.value)" placeholder="NOMBRE COMPLETO"></div>
-        <div class="field"><label>Nacionalidad</label>
-          <input value="${esc(s.nacionalidad)}" oninput="updateSocio(${s.id},'nacionalidad',this.value)" placeholder="mexicana"></div>
-        <div class="field"><label>Nacionalidad de los Padres</label>
-          <input value="${esc(s.nacPadres)}" oninput="updateSocio(${s.id},'nacPadres',this.value)" placeholder="mexicanos"></div>
-        <div class="field"><label>Lugar de Origen</label>
-          <input value="${esc(s.lugarOrigen)}" oninput="updateSocio(${s.id},'lugarOrigen',this.value)" placeholder="México"></div>
-        <div class="field"><label>Fecha de Nacimiento</label>
-          <input type="date" value="${esc(s.fechaNac)}" oninput="updateSocio(${s.id},'fechaNac',this.value)"></div>
-        <div class="field"><label>Estado Civil</label>
-          <input value="${esc(s.estadoCivil)}" oninput="updateSocio(${s.id},'estadoCivil',this.value)" placeholder="soltero / casado..."></div>
-        <div class="field"><label>Profesión</label>
-          <input value="${esc(s.profesion)}" oninput="updateSocio(${s.id},'profesion',this.value)" placeholder="empresario..."></div>
-        <div class="field span-2"><label>Domicilio Completo</label>
-          <input value="${esc(s.domicilio)}" oninput="updateSocio(${s.id},'domicilio',this.value)" placeholder="Calle X número Y, Colonia Z, C.P. 00000, en la ciudad de ABC, Estado de DEF"></div>
-        <div class="field"><label>Tipo de Identificación</label>
-          <input value="${esc(s.tipoIdent)}" oninput="updateSocio(${s.id},'tipoIdent',this.value)"></div>
-        <div class="field"><label>Detalle Identificación (clave de elector, etc.)</label>
-          <input value="${esc(s.detalleIdent)}" oninput="updateSocio(${s.id},'detalleIdent',this.value)" placeholder="HWRMN82052115H300"></div>
-        <div class="field"><label>CURP</label>
-          <input value="${esc(s.curp)}" oninput="updateSocio(${s.id},'curp',this.value.toUpperCase())" placeholder="HOOM820521HMCWRN09" maxlength="18" style="text-transform:uppercase"></div>
-        <div class="field"><label>RFC</label>
-          <input value="${esc(s.rfc)}" oninput="updateSocio(${s.id},'rfc',this.value.toUpperCase())" placeholder="HOOM8205215U7" maxlength="13" style="text-transform:uppercase"></div>
-        <div class="field"><label>Número de Acciones Suscritas</label>
-          <input type="number" data-sid="${s.id}" data-field="acciones" value="${esc(s.acciones)}" oninput="updateSocio(${s.id},'acciones',this.value)"></div>
-        <div class="field"><label>Importe Total (MXN)</label>
-          <input type="number" data-sid="${s.id}" data-field="importe" value="${esc(s.importe)}" oninput="updateSocio(${s.id},'importe',this.value)" placeholder="se calcula automáticamente"></div>
-      </div>
-    `;
-    container.appendChild(div);
-  });
-  updateTotals();
-}
-
-function esc(v){
-  if(v===null||v===undefined) return '';
-  return String(v).replace(/"/g,'&quot;').replace(/</g,'&lt;');
-}
-
-function updateTotals(){
-  const totalAcc=socios.reduce((a,s)=>a+(parseFloat(s.acciones)||0),0);
-  const totalImp=socios.reduce((a,s)=>a+(parseFloat(s.importe)||0),0);
-  document.getElementById('tSocios').textContent=socios.length;
-  document.getElementById('tAcciones').textContent=totalAcc;
-  document.getElementById('tCapital').textContent=fmtMoneda(totalImp);
-
-  const capitalDeclarado=parseFloat(document.getElementById('capitalMonto').value)||0;
-  const accDeclaradas=parseFloat(document.getElementById('capitalAcciones').value)||0;
-
-  let estado='Pendiente', color='var(--ink-soft)';
-  if(socios.length===0){estado='Sin socios';}
-  else if(capitalDeclarado>0 && Math.abs(totalImp-capitalDeclarado)<0.01 && Math.abs(totalAcc-accDeclaradas)<0.01){
-    estado='✓ Cuadrado'; color='#2d5e2d';
-  } else if(capitalDeclarado>0){
-    estado='⚠ No cuadra'; color='var(--accent)';
-  }
-  const e=document.getElementById('tEstado');
-  e.textContent=estado;
-  e.style.color=color;
-}
-
-/* ========= HELPERS DE TEXTO ========= */
-function listaSociosNombres(){
-  if(socios.length===0) return '[NOMBRE DEL SOCIO 1, NOMBRE DEL SOCIO N]';
-  if(socios.length===1) return socios[0].nombre || '[NOMBRE DEL SOCIO]';
-  return socios.map(s=>s.nombre||'[SOCIO]').join(', ');
-}
-
-function letraApendice(i){
-  // A reservada para CUD; B,C,D... para socios y siguientes
-  const letras=['B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-  return letras[i] || `Z${i}`;
-}
-
-function generalesSocio(s,letra){
-  const nombre = (s.nombre || '[NOMBRE]').toUpperCase();
-  const nac = s.nacionalidad || '[NACIONALIDAD]';
-  const padres = s.nacPadres || '[NACIONALIDAD PADRES]';
-  const lugar = s.lugarOrigen || '[LUGAR DE ORIGEN]';
-  const fecha = s.fechaNac ? fechaToLetra(s.fechaNac) : '[FECHA NAC. EN LETRA]';
-  const civil = s.estadoCivil || '[ESTADO CIVIL]';
-  const prof = s.profesion || '[PROFESIÓN]';
-  const dom = s.domicilio || '[DOMICILIO]';
-  const ident = s.tipoIdent || 'Credencial para Votar vigente expedida por el Instituto Nacional Electoral';
-  const detIdent = s.detalleIdent ? desglosar(s.detalleIdent) : '[DETALLE IDENT.]';
-  const curp = s.curp ? desglosar(s.curp) : '[CURP DESGLOSADA]';
-  const rfc = s.rfc ? desglosar(s.rfc) : '[RFC DESGLOSADO]';
-
-  return `${nombre}, de nacionalidad ${nac}, de padres ${padres}, originario de ${lugar}, lugar donde nació el día ${fecha}, ${civil}, ${prof} con domicilio en ${dom}, quien se identifica con ${ident}, con Clave de Elector: ${detIdent}, la cual agrego en copia fotostática al apéndice de este instrumento con la letra que le "${letra}", certificando que dicha copia es reproducción fiel y exacta de su original con el que fue debidamente cotejada; con Clave Única de Registro de Población: ${curp} y con Registro Federal de Contribuyentes: ${rfc}.`;
-}
-
-/* ========= COLECTOR DE DATOS ========= */
-function collectData(){
-  return {
-    numInstrumento:document.getElementById('numInstrumento').value,
-    numVolumen:document.getElementById('numVolumen').value,
-    numFolios:document.getElementById('numFolios').value,
-    dia:document.getElementById('dia').value,
-    mes:document.getElementById('mes').value,
-    anio:document.getElementById('anio').value,
-    empresa:document.getElementById('empresa').value,
-    cud:document.getElementById('cud').value,
-    fechaCud:document.getElementById('fechaCud').value,
-    duracion:document.getElementById('duracion').value,
-    ciudadEstado:document.getElementById('ciudadEstado').value,
-    objeto:document.getElementById('objeto').value,
-    capitalMonto:document.getElementById('capitalMonto').value,
-    capitalAcciones:document.getElementById('capitalAcciones').value,
-    valorNominal:document.getElementById('valorNominal').value,
-    adminNombre:document.getElementById('adminNombre').value,
-    adminRFC:document.getElementById('adminRFC').value,
-    comisarioNombre:document.getElementById('comisarioNombre').value,
-    comisarioRFC:document.getElementById('comisarioRFC').value,
-    socios:JSON.parse(JSON.stringify(socios))
-  };
-}
-
-function fillForm(data){
-  ['numInstrumento','numVolumen','numFolios','dia','mes','anio','empresa','cud','fechaCud','duracion','ciudadEstado','objeto','capitalMonto','capitalAcciones','valorNominal','adminNombre','adminRFC','comisarioNombre','comisarioRFC'].forEach(id=>{
-    document.getElementById(id).value = data[id]!==undefined ? data[id] : '';
-  });
-  socios = (data.socios||[]).map(s=>({...s,id:s.id||Date.now()+Math.random()}));
-  renderSocios();
-}
-
-/* ========= GENERADOR DEL INSTRUMENTO (FIEL AL MACHOTE) ========= */
-function buildInstrumentBlocks(){
-  // Devuelve un arreglo de bloques estructurados:
-  // {type:'header'|'title'|'subtitle'|'paragraph'|'article'|'sep', text:..., bold?:bool, align?:..., articulo?:'ARTÍCULO X'}
-  const data = collectData();
-
-  const numInst = data.numInstrumento || '[NUMERO DE INSTRUMENTO]';
-  const numVol = data.numVolumen || '[NUMERO DE VOLUMEN]';
-  const numFol = data.numFolios || '[NUMERO DE FOLIOS]';
-  const dia = data.dia ? diaToLetra(data.dia) : '[DIA]';
-  const mes = data.mes || '[MES]';
-  const anio = data.anio ? anioToLetra(data.anio) : '[AÑO]';
-  const empresa = (data.empresa || '[NOMBRE DE LA EMPRESA]').toUpperCase();
-  const cud = data.cud || '[CLAVE UNICA DEL DOCUMENTO]';
-  const cudEsc = data.cud ? desglosar(data.cud) : '[CLAVE UNICA DEL DOCUMENTO ESCRITA]';
-  const fechaCud = data.fechaCud ? fechaToLetra(data.fechaCud) : '[FECHA DE EXPEDICION]';
-  const duracion = data.duracion || '[DURACION DE LA SOCIEDAD]';
-  const ciudadEstado = data.ciudadEstado || '[CIUDAD, ESTADO]';
-  const objeto = data.objeto || 'SE DESCRIBE EL O LOS OBJETOS DE LA SOCIEDAD';
-
-  const capitalMonto = parseFloat(data.capitalMonto)||0;
-  const capitalAcciones = parseFloat(data.capitalAcciones)||0;
-  const valorNominal = parseFloat(data.valorNominal)||0;
-
-  const capitalLetra = capitalMonto?numToLetra(capitalMonto):'[MONTO DEL CAPITAL EN LETRA]';
-  const accionesLetra = capitalAcciones?numToLetra(capitalAcciones):'[REPRESENTACION DEL CAPITAL EN LETRA]';
-  const valorNominalLetra = valorNominal?numToLetra(valorNominal):'[VALOR NOMINAL EN LETRA]';
-
-  const adminNombre = (data.adminNombre || '[NOMBRE DEL ADMINISTRADOR UNICO]').toUpperCase();
-  const adminRFC = data.adminRFC || '[RFC DEL ADMINISTRADOR UNICO]';
-  const adminRFCEsc = data.adminRFC ? desglosar(data.adminRFC) : '[RFC ESCRITO DEL ADMINISTRADOR UNICO]';
-  const comNombre = (data.comisarioNombre || '[NOMBRE DEL COMISARIO]').toUpperCase();
-  const comRFC = data.comisarioRFC || '[RFC DEL COMISARIO]';
-  const comRFCEsc = data.comisarioRFC ? desglosar(data.comisarioRFC) : '[RFC ESCRITO DEL COMISARIO]';
-
-  const sociosNombresUpper = listaSociosNombres().toUpperCase();
-
-  const B = []; // bloques
-
-  // ===== ENCABEZADO =====
-  B.push({type:'header', text:`INSTRUMENTO NÚMERO "${numInst}".`});
-  B.push({type:'header', text:`VOLUMEN NÚMERO "${numVol}".`});
-  B.push({type:'header', text:`FOLIOS DEL "${numFol}" ATS/JMGCG.`});
-  B.push({type:'header', text:`ACTO: CONSTITUCIÓN DE SOCIEDAD.`});
-  B.push({type:'header', text:`OTORGANTES: "${sociosNombresUpper}".`});
-  B.push({type:'spacer'});
-
-  B.push({type:'paragraph', text:`EN METEPEC, ESTADO DE MÉXICO, a "${dia}" de "${mes}" del año "${anio}", YO, Licenciado JOSÉ MANUEL GÓMEZ DEL CAMPO GURZA, TITULAR DE LA NOTARIA CIENTO CUARENTA Y NUEVE DEL ESTADO DE MÉXICO, con residencia en esta Ciudad, hago constar:`});
-
-  B.push({type:'paragraph', text:`EL CONTRATO DE SOCIEDAD MERCANTIL que celebran los señores "${sociosNombresUpper}", por el que se constituye "${empresa}", bajo la forma de SOCIEDAD ANÓNIMA con régimen de CAPITAL VARIABLE.`});
-
-  B.push({type:'paragraph', text:`Acto que se consigna al tenor de la protesta, antecedentes y cláusulas siguientes:`});
-
-  B.push({type:'subtitle', text:'P R O T E S T A'});
-  B.push({type:'paragraph', text:`Previo al otorgamiento de este instrumento, el suscrito se identificó plenamente como Notario en ejercicio ante los comparecientes, protestándolos para que se conduzcan con verdad en sus declaraciones, habiéndoles advertido que todas las declaraciones hechas en este instrumento se consideran realizadas bajo protesta de decir verdad, y de las penas en que incurren quienes declaran con falsedad ante Notario.`});
-
-  B.push({type:'subtitle', text:'A N T E C E D E N T E S'});
-
-  B.push({type:'paragraph', text:`I.- AUTORIZACIÓN DE USO DE DENOMINACIÓN O RAZÓN SOCIAL.`, bold:true});
-  B.push({type:'paragraph', text:`Los comparecientes me exhiben la Autorización de Uso de Denominación o Razón Social con Clave Única del Documento (CUD): "${cud}" ("${cudEsc}"), expedida el día "${fechaCud}", cuya impresión de su constancia agrego al apéndice de este instrumento marcada con la letra "A", mediante la cual la Secretaría de Economía autorizó el uso de la denominación: "${empresa}".`});
-
-  B.push({type:'paragraph', text:`En cumplimiento a lo dispuesto por los artículos veintiuno y veintidós del Reglamento para la Autorización de Uso de Denominaciones y Razones Sociales, hago constar que:`});
-  B.push({type:'paragraph', text:`a.- Dicha autorización se encuentra vigente y que la misma no se encuentra sujeta a condición alguna.`});
-  B.push({type:'paragraph', text:`b.- Informé a los comparecientes que en términos del artículo veintidós del Reglamento para la Autorización de Uso de Denominaciones y Razones Sociales, las sociedades o asociaciones que usen o pretendan usar una denominación o razón social, tendrán las obligaciones siguientes:`});
-  B.push({type:'paragraph', text:`i.- Responder por cualquier daño, perjuicio o afectación que pudiera causar el uso indebido o no autorizado de una Denominación o Razón Social conforme a la Ley de Inversión Extranjera y el referido Reglamento, y;`});
-  B.push({type:'paragraph', text:`ii.- Proporcionar a la Secretaría de Economía la información y documentación que le sea requerida por escrito o a través del Sistema que para tal efecto tiene establecido, en relación con el uso de una denominación o razón social, al momento de reservar la denominación o razón social, durante el tiempo en que se encuentre en uso, y después de que se haya dado el aviso de liberación respecto de la denominación o razón social.`});
-
-  B.push({type:'paragraph', text:`II.- CLAVES EN EL REGISTRO FEDERAL DE CONTRIBUYENTES.`, bold:true});
-  B.push({type:'paragraph', text:`Los comparecientes manifiestan que los accionistas de la Sociedad que por este instrumento se constituye, así como los representantes legales de la misma que ejercerán facultades de representación ante las autoridades fiscales, o bien, solicitarán su inscripción, se encuentran inscritos en el Registro Federal de Contribuyentes de la siguiente manera:`});
-
-  socios.forEach((s,i)=>{
-    const letras=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o'];
-    const letra = letras[i] || `${i+1}`;
-    const rfcEsc = s.rfc ? desglosar(s.rfc) : '[RFC ESCRITO]';
-    B.push({type:'paragraph', text:`${letra}.- El señor(a) ${(s.nombre||'[NOMBRE DEL SOCIO]').toUpperCase()} con la clave: ${rfcEsc}, y al efecto me exhibe la impresión de su Constancia de Situación Fiscal, misma que agrego al apéndice de este instrumento marcada con la letra "${letraApendice(i)}".`});
-  });
-
-  B.push({type:'paragraph', text:`Expuesto lo anterior, los comparecientes otorgan las siguientes:`});
-
-  B.push({type:'subtitle', text:'C L Á U S U L A S'});
-
-  B.push({type:'paragraph', text:`PRIMERA.- Los señores ${sociosNombresUpper} celebran contrato de sociedad mercantil por el que convienen en constituir una sociedad bajo la forma de SOCIEDAD ANÓNIMA con régimen de CAPITAL VARIABLE, que será denominada "${empresa}", SOCIEDAD ANÓNIMA DE CAPITAL VARIABLE.`});
-
-  B.push({type:'paragraph', text:`SEGUNDA.- Los señores ${sociosNombresUpper} acuerdan que la sociedad mercantil que se constituye en este instrumento quede regida por los siguientes:`});
-
-  // ===== ESTATUTOS =====
-  B.push({type:'subtitle', text:'ESTATUTOS SOCIALES'});
-  B.push({type:'subtitle', text:'CAPÍTULO PRIMERO'});
-  B.push({type:'subtitle', text:'DE LA DENOMINACIÓN, DOMICILIO, DURACIÓN, OBJETO Y NACIONALIDAD'});
-
-  B.push({type:'article', text:`ARTÍCULO PRIMERO.- La sociedad se denominará "${empresa}", e irá seguida de las palabras SOCIEDAD ANÓNIMA DE CAPITAL VARIABLE, o de sus abreviaturas, S.A. DE C.V.`});
-  B.push({type:'article', text:`ARTÍCULO SEGUNDO.- La duración de la sociedad será de ${duracion}. Los ejercicios sociales correrán del primero de enero al treinta y uno de diciembre de cada año, con excepción del primer ejercicio, que durará de la fecha de firma de este instrumento, al treinta y uno de diciembre del presente año.`});
-  B.push({type:'article', text:`ARTÍCULO TERCERO.- El domicilio de la sociedad será en ${ciudadEstado}, sin perjuicio de establecer sucursales, agencias, oficinas o representaciones en cualesquiera otros lugares de la República Mexicana o del Extranjero.`});
-  B.push({type:'article', text:`ARTÍCULO CUARTO.- El objeto de la sociedad será: ${objeto}`});
-  B.push({type:'article', text:`ARTÍCULO QUINTO.- La nacionalidad de la sociedad es mexicana. La sociedad no admitirá directa o indirectamente como socios a inversionistas extranjeros, ni a sociedades sin cláusula de exclusión de extranjeros, por lo que no reconocerá en absoluto derecho de socios a los mismos inversionistas o sociedades.`});
-
-  B.push({type:'subtitle', text:'CAPÍTULO SEGUNDO'});
-  B.push({type:'subtitle', text:'DEL CAPITAL SOCIAL Y ACCIONES'});
-
-  B.push({type:'article', text:`ARTÍCULO SEXTO.- El capital social es variable, con un mínimo sin derecho a retiro de $${capitalMonto.toLocaleString('es-MX',{minimumFractionDigits:2})} (${capitalLetra} pesos) MONEDA NACIONAL, representado por ${capitalAcciones} (${accionesLetra}) acciones con un valor nominal de $${valorNominal.toLocaleString('es-MX',{minimumFractionDigits:2})} (${valorNominalLetra} pesos) MONEDA NACIONAL, cada una, que serán nominativas, por lo que la sociedad deberá llevar un libro especial de registro de dichas acciones en los términos de Ley. La parte variable del capital tendrá un máximo ilimitado.`});
-  B.push({type:'article', text:`ARTÍCULO SÉPTIMO.- Las acciones deberán estar totalmente suscritas. Las que se paguen en efectivo deberán estar pagadas por lo menos en un veinte por ciento de su importe cada una de ellas y las que se paguen en todo o en parte en especie, deberán estar íntegramente pagadas.`});
-  B.push({type:'article', text:`ARTÍCULO OCTAVO.- Las acciones forman una serie única y confieren a sus tenedores iguales derechos, serán de igual valor y deberán ser firmadas por el Administrador Único o por el Presidente y Tesorero del Consejo de Administración, en su caso; deberán estar expedidas en un plazo que no excederá de un año contado a partir de la fecha de este instrumento; deberán reunir los requisitos que exige el artículo ciento veinticinco de la Ley General de Sociedades Mercantiles; llevarán cupones anexos para el pago de dividendos y podrán expedirse en títulos que representen una o varias acciones. Mientras se expiden los títulos definitivos se expedirán certificados provisionales, los que deberán ser firmados por las mismas personas que deban firmar los títulos definitivos y serán nominativos.`});
-  B.push({type:'article', text:`ARTÍCULO NOVENO.- La Sociedad contará con un Libro de Registro de Acciones en el cual será registrado (i) el nombre, nacionalidad, domicilio y dirección de correo electrónico de cada accionista, (ii) la indicación de las acciones que les pertenezcan, expresándose los números, series, clases y demás particularidades y (iii) las transmisiones de acciones que se realicen.`});
-  B.push({type:'paragraph', text:`La Sociedad considerará a la persona cuyo nombre esté registrado en el Libro de Registro de Acciones al que se refiere el presente Artículo, como el propietario de las acciones representativas del capital social inscritas a su nombre, por lo tanto, solamente las personas cuyos nombres estén inscritos en el Libro de Registro de Acciones podrán ejercer los derechos derivados de los títulos que amparen las acciones emitidas por la Sociedad.`});
-
-  B.push({type:'subtitle', text:'CAPÍTULO TERCERO'});
-  B.push({type:'subtitle', text:'DE LAS ASAMBLEAS DE ACCIONISTAS'});
-
-  B.push({type:'article', text:`ARTÍCULO DÉCIMO.- La Asamblea General de Accionistas es el órgano supremo de la Sociedad, podrá acordar y ratificar todos los actos y operaciones de ésta y sus resoluciones serán cumplidas por la persona que ella misma designe, o a falta de designación, por el administrador o por el consejo de administración, y sus decisiones legalmente adoptadas son obligatorias aun para los ausentes o disidentes.`});
-  B.push({type:'article', text:`ARTÍCULO DÉCIMO PRIMERO.- Las Asambleas Generales de Accionistas podrán ser Ordinarias o Extraordinarias, éstas tratarán de los asuntos a que se refiere el artículo ciento ochenta y dos de la Ley General de Sociedades Mercantiles, y aquéllas, de cualquier otro asunto. Ambas podrán reunirse en cualquier tiempo, pero las primeras deberán reunirse por lo menos una vez al año dentro de los cuatro primeros meses siguientes a la clausura de cada ejercicio social y deberán tratar, además de los asuntos que se incluyan en el Orden del Día, los señalados en el artículo ciento ochenta y uno de la citada Ley.`});
-  B.push({type:'paragraph', text:`Las Asambleas Generales de Accionistas, sean Ordinarias o Extraordinarias, podrán celebrarse por cualquiera de las siguientes modalidades:`});
-  B.push({type:'paragraph', text:`a.- En forma Totalmente Presencial, a través de la reunión física de los accionistas en un sitio o lugar determinado en el domicilio social, salvo caso fortuito o fuerza mayor.`});
-  B.push({type:'paragraph', text:`b.- En forma Totalmente Telemática, por reunión no presencial ni física, sino mediante el uso de medios electrónicos, ópticos o de cualquier otra tecnología, que permitan la participación de los asistentes por dichos medios a la Asamblea, siempre y cuando los asistentes puedan real y efectivamente establecer una comunicación simultánea, continua y en tiempo real, vía remota a través de cualquier medio o herramienta tecnológica que así lo permita, y por virtud del cual todos los asistentes se puedan visualizar, reconocer, escuchar e interactuar con claridad, así como ejercer sus derechos de una forma funcionalmente equivalente a las Asambleas Totalmente Presenciales.`});
-  B.push({type:'paragraph', text:`No se entenderá que una Asamblea General de Accionistas se realiza fuera del domicilio social por el sólo hecho de utilizarse medios electrónicos, ópticos o de cualquier otra tecnología.`});
-  B.push({type:'paragraph', text:`c.- En forma Mixta, en las que alguno o algunos de los asistentes se reúnan en forma física, y el resto en forma remota mediante el uso de medios electrónicos, ópticos o de cualquier otra tecnología que satisfagan los requisitos previstos por el inciso inmediato anterior. Las Asambleas Generales celebradas en forma Mixta, sin necesidad de existir caso fortuito o fuerza mayor, podrán celebrarse fuera del domicilio social, siempre y cuando, caso por caso, la totalidad de los accionistas lo aprueben previamente a la celebración de la Asamblea o al instalarse ésta y, adicionalmente, exista la posibilidad de utilizar medios electrónicos, ópticos o de cualquier otra tecnología. En este caso, se deberá señalar en el acta de asamblea el domicilio en el cual se llevó a cabo la Asamblea respectiva.`});
-
-  B.push({type:'article', text:`ARTÍCULO DÉCIMO SEGUNDO.- Sea cual fuere la modalidad bajo la que se celebren las Asambleas Generales de Accionistas, en todo caso se deberá contar con mecanismos o medidas que permitan el acceso, la acreditación de la identidad de los asistentes, el sentido de su voto y, adicionalmente, deberá generarse la evidencia correspondiente, para lo cual, se estará a lo siguiente:`});
-  B.push({type:'paragraph', text:`a.- Las convocatorias deberán ser efectuadas por el Administrador Único o Consejo de Administración, por el o los Comisarios o por la autoridad judicial, en su caso, quienes estarán facultados para convocar cualquier modalidad de Asamblea de las previstas en el artículo anterior.`});
-  B.push({type:'paragraph', text:`b.- La convocatoria deberá hacerse por medio de la publicación de un aviso en el sistema electrónico establecido por la Secretaría de Economía, o en su caso, en la forma que señale la ley, pero en todo caso además de la publicación, deberá enviarse la convocatoria a cada uno de los accionistas a través del correo electrónico que se tenga registrado en el Libro de Registro de Acciones, con anticipación de quince días naturales a la fecha en que deba celebrarse.`});
-  B.push({type:'paragraph', text:`La convocatoria deberá contener el orden del día con expresión de la fecha y hora y, asimismo, deberá indicar si la reunión que se convoque se llevará a cabo (i) en forma Totalmente Presencial, en cuyo caso deberá señalar el sitio o lugar del domicilio social en que deba celebrarse la Asamblea; (ii) en forma Totalmente Telemática, o (iii) en forma Mixta. En estos dos últimos casos, la convocatoria deberá expresar con claridad las instrucciones para el acceso y participación en ellas, o bien, la manera de obtener dichas instrucciones, mismas que señalarán los datos necesarios para establecer la comunicación simultánea a través de los medios electrónicos, ópticos o de cualquier otra tecnología que permitan la comunicación remota en los términos previstos en el inciso b) del artículo Décimo Primero que antecede.`});
-  B.push({type:'paragraph', text:`c.- Los accionistas podrán reunirse sin que medie convocatoria previa, siempre y cuando al momento de la votación del orden del día y durante la Asamblea de que se trate se encuentre presente o representado, física o telemáticamente, el cien por ciento del capital social de la sociedad con derecho a voto.`});
-  B.push({type:'paragraph', text:`d.- A fin de acreditar la identidad de los accionistas deberá agregarse a las actas de las Asambleas Generales, copia fotostática de una identificación de los accionistas expedida por autoridad facultada para ello, que contenga su nombre, firma y fotografía.`});
-  B.push({type:'paragraph', text:`e.- El Secretario de la Asamblea generará la evidencia de que en la celebración de la Asamblea se contó con mecanismos o medidas que permitieron el acceso, la acreditación de la identidad de los asistentes y el sentido de su voto, evidencia que en todo caso será de tipo documental, para lo cual bastará que el Secretario levante el Acta correspondiente en términos del artículo Décimo Cuarto de estos Estatutos Sociales.`});
-
-  B.push({type:'article', text:`ARTÍCULO DÉCIMO TERCERO.- Para que se considere válidamente reunida una asamblea general ordinaria, se requerirá que se encuentren presentes o representados, física o telemáticamente, según sea el caso, aún por medio de simple carta poder sin ratificación alguna, los accionistas titulares de las acciones que representen por lo menos el cincuenta por ciento del capital social y las resoluciones se tomarán por mayoría de votos.`});
-  B.push({type:'paragraph', text:`Cuando no haya quórum en asamblea reunida por virtud de primera convocatoria, se convocará por segunda vez en la forma antes establecida y la asamblea se considerará válidamente instalada con la presencia de los accionistas que asistan a la misma, física o telemáticamente, según sea el caso.`});
-  B.push({type:'paragraph', text:`Para que sea válida una asamblea extraordinaria reunida en virtud de primera convocatoria deberán estar presentes física o telemáticamente, según sea el caso, los accionistas titulares del setenta y cinco por ciento del capital social y los acuerdos deberán tomarse por el voto favorable de los accionistas que representen por lo menos el cincuenta por ciento de dicho capital social. Si no hubiere quórum en primera convocatoria, la asamblea podrá constituirse en segunda o ulterior convocatoria y tomar sus decisiones válidamente cuando éstas se acuerden por el voto favorable de los accionistas que representen por lo menos el cincuenta por ciento del capital social, el que en consecuencia será el quórum mínimo de asistencia.`});
-  B.push({type:'paragraph', text:`No obstante lo anterior, podrán adoptarse resoluciones fuera de asamblea por unanimidad de los accionistas que representen la totalidad de las acciones con derecho a voto o de la categoría especial de accionistas de que se trate, en su caso, y dichas resoluciones tendrán, para todos los efectos legales, la misma validez que si hubieren sido adoptadas reunidos en asamblea general o especial, respectivamente, siempre que se confirmen por escrito.`});
-
-  B.push({type:'article', text:`ARTÍCULO DÉCIMO CUARTO.- Las asambleas serán presididas por el Administrador Único o por el Presidente del Consejo de Administración en su caso y en su defecto por la persona que designe la asamblea al instalarse. Actuará como Secretario el que lo sea del Consejo si lo hubiere y en su defecto la persona que designe la propia asamblea al momento de reunirse. El Secretario deberá levantar en el libro que para tal efecto lleve la Sociedad, el acta correspondiente que deberá ser firmada por el Presidente y el Secretario, así como por el Comisario o Comisarios que asistan, y por las demás personas que hayan concurrido a la asamblea y que quisieren hacerlo.`});
-  B.push({type:'paragraph', text:`Las actas de las Asambleas de Accionistas, las listas de asistencia respectivas, los documentos que contengan resoluciones adoptadas unánimemente por la totalidad de los Accionistas, así como cualquier otro documento que deba ser emitido por la Sociedad o por cualquiera de sus funcionarios, podrán ser firmados con firma autógrafa o con firma electrónica por cualquier persona que deba firmarlos. En los casos en que se utilice la firma electrónica, el Administrador Único, cualquier miembro del Consejo de Administración o cualquier persona designada por la Asamblea de Accionistas o por el órgano de administración para tal efecto, podrán emitir certificaciones que permitan atribuir el Mensaje de Datos a cada firmante, con lo cual se tendrá por cumplido el requisito establecido en el segundo párrafo del artículo noventa y tres del Código de Comercio, sin perjuicio de que puedan utilizarse otros medios de atribución legalmente admisibles.`});
-  B.push({type:'paragraph', text:`En términos de lo previsto por el segundo párrafo del artículo cuarenta y nueve y por el primer párrafo del artículo noventa y tres del Código de Comercio, en relación con cada Mensaje de Datos que se emita en términos de estos Estatutos Sociales, se requerirá que la información se haya mantenido íntegra e inalterada a partir del momento en que se generó por primera vez en su forma definitiva y que sea accesible para su ulterior consulta, de acuerdo con lo que indique la Norma Oficial Mexicano vigente y aplicable a cada caso.`});
-
-  B.push({type:'subtitle', text:'CAPÍTULO CUARTO'});
-  B.push({type:'subtitle', text:'DE LA ADMINISTRACIÓN DE LA SOCIEDAD'});
-
-  B.push({type:'article', text:`ARTÍCULO DÉCIMO QUINTO.- La dirección y administración estarán a cargo de un Administrador Único o de un Consejo compuesto del número de miembros titulares y suplentes que señale la asamblea, la que determinará si la administración se encomienda a uno u otro. El Administrador o los Consejeros durarán en funciones hasta que tomen posesión las personas designadas para sustituirlos. Si la administración se encomienda a un Consejo, el nombrado en primer lugar será el Presidente; el segundo Secretario; el tercero Tesorero y los demás Vocales.`});
-  B.push({type:'article', text:`ARTÍCULO DÉCIMO SEXTO.- El Consejo de Administración funcionará legalmente con la asistencia de la mayoría de sus miembros y los acuerdos se tomarán por mayoría de votos, teniendo el Presidente voto de calidad en caso de empate. Los Consejeros suplentes entrarán en funciones, indistintamente, en ausencia de los titulares.`});
-  B.push({type:'paragraph', text:`Las Sesiones del Consejo de Administración podrán celebrarse por cualquiera de las siguientes modalidades:`});
-  B.push({type:'paragraph', text:`a.- En forma Totalmente Presencial, a través de la reunión física de los Consejeros en un sitio o lugar determinado.`});
-  B.push({type:'paragraph', text:`b.- En forma Totalmente Telemática, por reunión no presencial ni física, sino mediante el uso de medios electrónicos, ópticos o de cualquier otra tecnología, que permitan la participación de los asistentes por dichos medios a la Sesión de Consejo, siempre y cuando los asistentes puedan real y efectivamente establecer una comunicación simultánea, continua y en tiempo real, vía remota a través de cualquier medio o herramienta tecnológica que así lo permita, y por virtud del cual todos los asistentes se puedan visualizar, reconocer, escuchar e interactuar con claridad, así como ejercer sus derechos de una forma funcionalmente equivalente a las Sesiones de Consejo de Administración Totalmente Presenciales.`});
-  B.push({type:'paragraph', text:`c.- En forma mixta, en las que alguno o algunos de los asistentes se reúnan en forma física, y el resto en forma remota mediante el uso de medios electrónicos, ópticos o de cualquier otra tecnología que satisfagan los requisitos previstos por el inciso inmediato anterior.`});
-  B.push({type:'paragraph', text:`Las Sesiones del Consejo de Administración deberán celebrarse en el domicilio de la Sociedad, sin embargo, si así lo determina el Consejo, podrán reunirse en otro domicilio o en el extranjero.`});
-  B.push({type:'paragraph', text:`Las actas de las Sesiones del Consejo de Administración serán transcritas en el Libro de Sesiones de Consejo y serán firmadas por todas las personas que hayan asistido.`});
-  B.push({type:'paragraph', text:`No obstante lo anterior, podrán adoptarse resoluciones fuera de Sesión de Consejo por unanimidad de sus miembros, y dichas resoluciones tendrán, para todos los efectos legales, la misma validez que si hubieren sido adoptadas reunidos en Sesión de Consejo, siempre que se confirmen por escrito.`});
-  B.push({type:'paragraph', text:`Las actas de las Sesiones del Consejo de Administración, las listas de asistencia respectivas, los documentos que contengan resoluciones adoptadas unánimemente por la totalidad de los miembros del Consejo de Administración, así como cualquier otro documento que deba ser emitido por la Sociedad o por cualquiera de sus funcionarios, podrán ser firmados con firma autógrafa o con firma electrónica por cualquier persona que deba firmarlos. En los casos en que se utilice la firma electrónica, el Administrador Único, cualquier miembro del Consejo de Administración o cualquier persona designada por la Asamblea de Accionistas o por el órgano de administración para tal efecto, podrán emitir certificaciones que permitan atribuir el Mensaje de Datos a cada firmante, con lo cual se tendrá por cumplido el requisito establecido en el segundo párrafo del artículo noventa y tres del Código de Comercio, sin perjuicio de que puedan utilizarse otros medios de atribución legalmente admisibles.`});
-  B.push({type:'paragraph', text:`En términos de lo previsto por el segundo párrafo del artículo cuarenta y nueve y por el primer párrafo del artículo noventa y tres del Código de Comercio, en relación con cada Mensajes de Datos que se emita en términos de estos Estatutos Sociales, se requerirá que la información se haya mantenido íntegra e inalterada a partir del momento en que se generó por primera vez en su forma definitiva y que sea accesible para su ulterior consulta, de acuerdo con lo que indique la Norma Oficial Mexicano vigente y aplicable a cada caso.`});
-
-  B.push({type:'article', text:`ARTÍCULO DÉCIMO SÉPTIMO.- El Presidente del Consejo será el representante del mismo, y el ejecutor de sus resoluciones, podrán además designarse delegados especiales para la ejecución de los acuerdos.`});
-  B.push({type:'article', text:`ARTÍCULO DÉCIMO OCTAVO.- La minoría de accionistas que representen el veinticinco por ciento del capital social, tendrá derecho a nombrar cuando menos un Consejero cuando los Administradores sean tres o más.`});
-  B.push({type:'article', text:`ARTÍCULO DÉCIMO NOVENO.- El Consejo de Administración o el Administrador Único en su caso, representarán a la Sociedad ante toda clase de autoridades y personas, con amplios poderes:`});
-  B.push({type:'paragraph', text:`En forma enunciativa y no limitativa podrán:`});
-  B.push({type:'paragraph', text:`I.- Realizar los objetos sociales.`});
-  B.push({type:'paragraph', text:`II.- Otorgar actos de dominio con todas las facultades generales y las especiales que requieran poder o cláusula especial conforme a la Ley, en los términos del párrafo tercero del artículo siete punto setecientos setenta y uno del Código Civil del Estado de México y sus correlativos dos mil quinientos cincuenta y cuatro del Código Civil Federal, Código Civil para el Distrito Federal, y sus correlativos de los Códigos Civiles de las demás Entidades Federativas de los Estados Unidos Mexicanos.`});
-  B.push({type:'paragraph', text:`III.- Administrar bienes, con todas las facultades generales y las especiales que requieran poder o cláusula especial conforme a la Ley, de acuerdo con el párrafo segundo del artículo siete punto setecientos setenta y uno del Código Civil del Estado de México y sus correlativos dos mil quinientos cincuenta y cuatro del Código Civil Federal, Código Civil para el Distrito Federal, y sus correlativos de los Códigos Civiles de las demás Entidades Federativas de los Estados Unidos Mexicanos.`});
-  B.push({type:'paragraph', text:`IV.- Representar a la Sociedad con poder general para pleitos y cobranzas, con todas las facultades generales y las especiales que requieran poder o cláusula especial conforme a la Ley, en los términos del párrafo primero del artículo siete punto setecientos setenta y uno del Código Civil del Estado de México y sus correlativos dos mil quinientos cincuenta y cuatro del Código Civil Federal, Código Civil para el Distrito Federal, y sus correlativos de los Códigos Civiles de las demás Entidades Federativas de los Estados Unidos Mexicanos, pudiendo desistirse del juicio de amparo y presentar denuncias y querellas penales y desistirse de éstas.`});
-  B.push({type:'paragraph', text:`V.- Poder general para actos de administración en materia laboral, por lo que gozará de las facultades establecidas en los artículos once, seiscientos ochenta y cuatro, seiscientos noventa y dos, ochocientos setenta y tres de la Ley Federal del Trabajo, pudiendo representar a la poderdante ante toda clase de sindicatos, concurrir a toda clase de audiencias, citatorios, requerimientos, avenencias, transacciones, arreglos, finiquitos, articular o absolver posiciones, promover o desistirse del juicio de amparo, presentar denuncias y querellas penales, otorgar el perdón, promover inexistencias de huelgas, resolver conflictos de orden económico, ostentarse en calidad de patrón frente a los trabajadores con las más amplias facultades de representación, sin limitación alguna y sin impedimentos de ninguna especie, pudiendo inclusive comparecer a la audiencia de conciliación, a la audiencia preliminar y a la audiencia de juicio a que se refieren los artículos seiscientos ochenta y cuatro y demás relativos de la Ley Federal del Trabajo, actuando siempre con la calidad de Patrón principalmente en el caso de audiencias a que se refieren los artículos seiscientos ochenta y cuatro de la Ley Federal del Trabajo.`});
-  B.push({type:'paragraph', text:`Asimismo, podrá comparecer ante las Juntas de Conciliación y Arbitraje a las audiencias de conciliación, demanda y excepciones, ofrecimiento y admisión de pruebas a que se refieren los artículos ochocientos setenta y cinco, ochocientos setenta y seis y ochocientos setenta y ocho de la Ley Federal del Trabajo, de conformidad con lo previsto por el Transitorio Octavo del Decreto por el que se reforman, adicionan y derogan diversas disposiciones de la Ley Federal del Trabajo, de la Ley Orgánica del Poder Judicial de la Federación, de la Ley Federal de la Defensoría Pública, de la Ley del Instituto del Fondo Nacional de la Vivienda para los Trabajadores y de la Ley del Seguro Social, en materia de Justicia Laboral, Libertad Sindical y Negociación Colectiva, publicado en el Diario Oficial de la Federación el día primero de mayo de dos mil diecinueve.`});
-  B.push({type:'paragraph', text:`Este poder lo podrá ejercer ante toda clase de autoridades Administrativas o Judiciales sean éstas Federales, de la Ciudad de México, Estatales o Municipales; ante las Autoridades del Trabajo, Centros de Conciliación, Tribunales y en general ante todo tipo de personas sean éstas físicas o morales.`});
-  B.push({type:'paragraph', text:`VI.- Poder especial para que representen a la Sociedad en toda clase de trámites administrativos ante cualesquiera autoridades, funcionarios y servidores públicos de las diversas dependencias y autoridades de la Administración Pública Federal, Descentralizada y Paraestatal del Gobierno de la Ciudad de México, los Estados de la República y Municipales, facultándolos para elaborar firmar y presentar toda clase de escritos, solicitudes, trámites, recibos, inconformidades, recursos y en general, cualquier documento y hacer cualquier gestión que ante ellas deba realizarse.`});
-  B.push({type:'paragraph', text:`VII.- Poder especial para trámites y procedimientos administrativos y fiscales, quedando facultados en términos de lo dispuesto por el artículo diecinueve del Código Fiscal de la Federación para ejercitar dicha representación ante toda clase de funcionarios, autoridades, empleados y en general cualesquier servidores públicos de la Secretaría de Hacienda y Crédito Público, Servicio de Administración Tributaría, Instituto Mexicano del Seguro Social, Instituto del Fondo Nacional de la Vivienda para los Trabajadores, así como ante la Tesorería de la Ciudad de México, Tesorerías Municipales y ante cualesquiera otras, quedando facultados para formular, firmar y presentar toda clase de declaraciones, avisos, manifestaciones, pagos, recursos, inconformidades, documentos de cualquier tipo y en general realizar cualquier trámite o gestión ante las mencionadas autoridades fiscales y representar en todo a la mandante, realizar la cobranza de los mismos pudiendo a la vez recoger cheques a nombre de la Sociedad, incluyéndose la facultad de tramitar y obtener de las autoridades fiscales competentes la firma electrónica avanzada, así como la de la Sociedad.`});
-  B.push({type:'paragraph', text:`VIII.- Poder especial para concursos, a fin de que en nombre y representación de la sociedad acuda ante Secretarías de Estado, Empresas de Participación Estatal, Organismos Descentralizados y, en general, ante cualquier Dependencia y Entidad de la Administración Pública Federal de la Administración Pública de la Ciudad de México, de los Estados y Municipios, y ante particulares a intervenir en nombre de la misma en los concursos que se convoquen, quedando investido de todas las facultades necesarias para tales fines y en particular para que participe en los actos de apertura de oferta y de fallo y firmen las actas correspondientes, entregue las muestras, los catálogos y la información adicional que se le solicite y en general firme toda clase de documentos, contratos, pedidos y cualquier tipo de documentos en cualquier etapa de los concursos en que participe la Sociedad, y en general para que ofrezca, contrate todos los servicios de la empresa mandante, realizar la cobranza de los mismos, pudiendo a la vez recoger cheques a nombre de la Sociedad.`});
-  B.push({type:'paragraph', text:`IX.- Nombrar a los gerentes, directores y empleados de la Sociedad, fijándoles sus facultades, obligaciones y remuneraciones, así como revocar dichos nombramientos.`});
-  B.push({type:'paragraph', text:`X.- Otorgar, suscribir, avalar títulos de crédito y en general, obligar cambiariamente a la sociedad conforme al artículo noveno de la Ley General de Títulos y Operaciones de Crédito.`});
-  B.push({type:'paragraph', text:`XI.- Poder para abrir y cerrar cuentas bancarias, girar en contra de ellas y designar personas autorizadas para girar en contra de las mismas, especialmente cuentas de cheques, así como librar, contratar las que haya abierto la mandante, autorizar a las personas que puedan librar cheques a cargo de dichas cuentas y retirarles la autorización.`});
-  B.push({type:'paragraph', text:`XII.- Nombrar apoderados generales o especiales, determinando sus facultades y revocar los poderes que haya otorgado la Sociedad, por conducto de cualquier representante.`});
-  B.push({type:'paragraph', text:`XIII.- Determinar los egresos.`});
-  B.push({type:'paragraph', text:`XIV.- Formular la información financiera.`});
-  B.push({type:'paragraph', text:`XV.- Convocar a las asambleas.`});
-  B.push({type:'paragraph', text:`XVI.- Las demás que les correspondan por Ley.`});
-  B.push({type:'paragraph', text:`La asamblea podrá limitar o reglamentar dichas facultades.`});
-
-  B.push({type:'article', text:`ARTÍCULO VIGÉSIMO.- Los directores y gerentes auxiliarán al Administrador o al Consejo con las facultades que se les confieran al nombrárseles.`});
-  B.push({type:'article', text:`ARTÍCULO VIGÉSIMO PRIMERO.- La asamblea que los designe determinará si para el ejercicio de su cargo deberán otorgar garantía el Administrador Único, los miembros del Consejo de Administración y los gerentes y en su caso si éstos fuesen designados por el Administrador Único o Consejo de Administración, este órgano determinará si deben caucionar o no su manejo al momento de su designación.`});
-
-  B.push({type:'subtitle', text:'CAPÍTULO QUINTO'});
-  B.push({type:'subtitle', text:'DE LA VIGILANCIA DE LA SOCIEDAD'});
-
-  B.push({type:'article', text:`ARTÍCULO VIGÉSIMO SEGUNDO.- La vigilancia estará a cargo de uno o varios Comisarios electos por la asamblea, caucionarán su gestión si así se resuelve conforme a la cláusula anterior, tendrán las atribuciones que determina el artículo ciento sesenta y seis de la Ley General de Sociedades Mercantiles y la remuneración que acuerde la asamblea.`});
-  B.push({type:'article', text:`ARTÍCULO VIGÉSIMO TERCERO.- En la Asamblea General Ordinaria anual a que se refiere la parte final del artículo décimo primero de estos estatutos, el Administrador Único o el Consejo de Administración presentarán la información financiera a que se refiere el artículo ciento setenta y dos de la Ley General de Sociedades Mercantiles, acompañado del informe del Comisario o Comisarios respecto a la veracidad, suficiencia y razonabilidad del citado informe.`});
-  B.push({type:'article', text:`ARTÍCULO VIGÉSIMO CUARTO.- La información a que se refiere el artículo anterior, incluido el informe del Comisario o Comisarios, deberá ponerse a disposición de los accionistas, por lo menos quince días antes de la fecha de la asamblea que haya de discutirla. Los accionistas tendrán derecho a que se les entregue una copia de los informes correspondientes, los que podrán requerir les sean entregados dentro del lapso indicado.`});
-
-  B.push({type:'subtitle', text:'CAPÍTULO SEXTO'});
-  B.push({type:'subtitle', text:'DE LAS UTILIDADES, PÉRDIDAS Y FONDO DE RESERVA'});
-
-  B.push({type:'article', text:`ARTÍCULO VIGÉSIMO QUINTO.- Las utilidades se aplicarán:`});
-  B.push({type:'paragraph', text:`I.- Un cinco por ciento cuando menos para formar o reconstituir el fondo de reserva, hasta que alcance el veinte por ciento del capital social.`});
-  B.push({type:'paragraph', text:`II.- A formar uno o más fondos de previsión.`});
-  B.push({type:'paragraph', text:`III.- El remanente se aplicará a los accionistas en proporción a sus acciones.`});
-  B.push({type:'paragraph', text:`Las utilidades serán pagadas cuando disponga de fondos la Sociedad.`});
-  B.push({type:'article', text:`ARTÍCULO VIGÉSIMO SEXTO.- Las pérdidas serán reportadas por las reservas, y en su caso por las acciones a partes iguales, hasta la concurrencia de su valor nominal.`});
-
-  B.push({type:'subtitle', text:'CAPÍTULO SÉPTIMO'});
-  B.push({type:'subtitle', text:'DE LA DISOLUCIÓN Y LIQUIDACIÓN DE LA SOCIEDAD'});
-
-  B.push({type:'article', text:`ARTÍCULO VIGÉSIMO SÉPTIMO.- La Sociedad se disolverá:`});
-  B.push({type:'paragraph', text:`I.- Por expiración del término fijado.`});
-  B.push({type:'paragraph', text:`II.- Por imposibilidad de realizar el objeto social.`});
-  B.push({type:'paragraph', text:`III.- Por acuerdo de la Asamblea General Extraordinaria de Accionistas.`});
-  B.push({type:'paragraph', text:`IV.- Por pérdida de las dos terceras partes del capital social.`});
-  B.push({type:'paragraph', text:`V.- En los demás casos señalados por la Ley.`});
-  B.push({type:'article', text:`ARTÍCULO VIGÉSIMO OCTAVO.- La liquidación estará a cargo de uno o más liquidadores nombrados por la asamblea, la que fijará sus atribuciones, o en su defecto por la autoridad judicial a petición de cualquier accionista.`});
-  B.push({type:'article', text:`ARTÍCULO VIGÉSIMO NOVENO.- Los liquidadores tendrán las facultades que la Ley les confiere y las que se les fijen al momento de su designación. Salvo las instrucciones expresas de la asamblea, los liquidadores procederán a:`});
-  B.push({type:'paragraph', text:`I.- Concluir las operaciones sociales que hubieren quedado pendientes al tiempo de la disolución;`});
-  B.push({type:'paragraph', text:`II.- Cobrar lo que se deba a la Sociedad y pagar lo que ella deba;`});
-  B.push({type:'paragraph', text:`III.- Vender los bienes de la Sociedad;`});
-  B.push({type:'paragraph', text:`IV.- Liquidar a cada socio su haber social;`});
-  B.push({type:'paragraph', text:`V.- Formular el balance final de liquidación.`});
-
-  B.push({type:'subtitle', text:'CAPÍTULO OCTAVO'});
-  B.push({type:'subtitle', text:'JURISDICCIÓN, LEGISLACIÓN Y SUPLETORIEDAD'});
-
-  B.push({type:'article', text:`ARTÍCULO TRIGÉSIMO.- Cualquier controversia o demanda que surja de o en relación con estos estatutos sociales, o del incumplimiento de los mismos, serán resueltas definitivamente en la jurisdicción y competencia de los tribunales de la Ciudad de México; renunciando expresamente a cualquier otro fuero que, en virtud de sus domicilios, presentes o futuros, lugar de la consumación de las actividades objeto del presente contrato o nacionalidades pudiera corresponderles.`});
-  B.push({type:'article', text:`ARTÍCULO TIRGÉSIMO PRIMERO.- La legislación aplicable para las controversias o desavenencias que se deriven del presente instrumento será la mexicana.`});
-  B.push({type:'article', text:`ARTÍCULO TRIGÉSIMO SEGUNDO.- Para todo lo no previsto en estos estatutos se aplicarán supletoriamente la Ley General de Sociedades Mercantiles, el Código de Comercio y el Código Civil Federal.`});
-
-  // ===== TRANSITORIOS =====
-  B.push({type:'subtitle', text:'ARTÍCULOS TRANSITORIOS'});
-
-  B.push({type:'paragraph', text:`PRIMERO.- Declaran los comparecientes que la totalidad de las acciones representativas de la parte mínimo del capital social de la Sociedad, han quedado totalmente suscritas y pagadas en numerario, de la siguiente forma:`});
-
-  const letrasMay=['A','B','C','D','E','F','G','H','I','J','K','L'];
-  socios.forEach((s,i)=>{
-    const letra = letrasMay[i] || `${i+1}`;
-    const accNum = parseFloat(s.acciones)||0;
-    const impNum = parseFloat(s.importe)||0;
-    const accLetra = accNum?numToLetra(accNum):'[ACCIONES EN LETRA]';
-    const impLetra = impNum?numToLetra(impNum):'[IMPORTE EN LETRA]';
-    B.push({type:'paragraph', text:`${letra}.- Por lo que se refiere al señor(a) ${(s.nombre||'[NOMBRE DEL SOCIO]').toUpperCase()} ha suscrito y pagado ${accNum} (${accLetra}) ACCIONES, con importe total de $${impNum.toLocaleString('es-MX',{minimumFractionDigits:2})} (${impLetra} pesos), MONEDA NACIONAL.`});
-  });
-
-  const totalAcc=socios.reduce((a,s)=>a+(parseFloat(s.acciones)||0),0);
-  const totalImp=socios.reduce((a,s)=>a+(parseFloat(s.importe)||0),0);
-  B.push({type:'paragraph', text:`TOTAL: ${totalAcc} (${totalAcc?numToLetra(totalAcc):'[]'}) ACCIONES, con importe total de $${totalImp.toLocaleString('es-MX',{minimumFractionDigits:2})} (${totalImp?numToLetra(totalImp):'[]'} pesos), MONEDA NACIONAL.`, bold:true});
-  B.push({type:'paragraph', text:`Dichas acciones quedan liberadas.`});
-
-  B.push({type:'paragraph', text:`SEGUNDO.- En términos del artículo seis de la Ley General de Sociedades Mercantiles, los señores ${sociosNombresUpper}, acuerdan lo siguiente:`});
-  B.push({type:'paragraph', text:`A.- Que la sociedad que por este instrumento constituyen sea regida y administrada por un ADMINISTRADOR ÚNICO, y para tal efecto designan a ${adminNombre} con registro Federal de Contribuyentes ${adminRFC} (${adminRFCEsc}), quien en este acto acepta el desempeño de dicho cargo, manifestando que no se encuentra en ninguno de los supuestos previstos por el artículo ciento sesenta y cinco de la Ley General de Sociedades Mercantiles.`});
-  B.push({type:'paragraph', text:`Dicho Administrador Único, gozará de los poderes y facultades a que se refiere el Artículo Décimo Noveno de los Estatutos Sociales, mismos que aquí se tienen por íntegramente reproducidas como si se insertasen a la letra.`});
-  B.push({type:'paragraph', text:`B.- Designar como COMISARIO de la Sociedad al señor(a) ${comNombre} con Registro Federal de Contribuyentes ${comRFC} (${comRFCEsc}), quien en este acto acepta el desempeño de dicho cargo, manifestando que no se encuentra en ninguno de los supuestos previstos por el artículo ciento sesenta y cinco de la Ley General de Sociedades Mercantiles, así como haber sido informado por el suscrito Notario de las responsabilidades inherentes al ejercicio de su cargo.`});
-
-  // ===== GENERALES =====
-  B.push({type:'subtitle', text:'G E N E R A L E S'});
-  B.push({type:'paragraph', text:`Los comparecientes, bajo protesta de decir verdad, manifestaron en cuanto a sus generales:`});
-  socios.forEach((s,i)=>{
-    B.push({type:'paragraph', text:generalesSocio(s, letraApendice(i))});
-  });
-
-  // ===== AVISO DE PRIVACIDAD =====
-  B.push({type:'subtitle', text:'AVISO DE PRIVACIDAD'});
-  B.push({type:'paragraph', text:`En cumplimiento de lo dispuesto por la Ley Federal de Protección de Datos Personales en Posesión de los Particulares, informé a los comparecientes que sus datos personales proporcionados a la notaría a mi cargo se utilizarán con la finalidad de otorgarle el servicio solicitado, que por el hecho de proporcionar dicha información autoriza a esta notaría a administrar sus datos personales y a transferir los mismos a terceros cuando sea estrictamente necesario para otorgarle los referidos servicios. Asimismo, le informé que podrá ejercer los derechos de acceso, rectificación, cancelación, oposición, divulgación y limitación de uso, mediante escrito dirigido al suscrito notario como Responsable de Protección de Datos Personales, en el domicilio de la notaría, donde también se encuentra disponible para su consulta el texto completo del Aviso de Privacidad.`});
-
-  // ===== CERTIFICACIÓN =====
-  B.push({type:'subtitle', text:'YO EL NOTARIO CERTIFICO'});
-  B.push({type:'paragraph', text:`I.- Que me identifiqué plenamente como titular de la notaría ciento cuarenta y nueve del Estado de México ante los comparecientes.`});
-  B.push({type:'paragraph', text:`II.- Que a mi juicio los comparecientes tienen capacidad legal para la celebración de este acto y que me aseguré de su identidad como consta en el apartado de generales de este instrumento.`});
-  B.push({type:'paragraph', text:`III.- Que advertí a la compareciente de las penas en que incurren quienes declaran falsamente ante notario.`});
-  B.push({type:'paragraph', text:`IV.- Que tuve a la vista los documentos citados en este instrumento, de acuerdo a las características y calidad de cada uno de ellos, que en este instrumento se especifican.`});
-  B.push({type:'paragraph', text:`V.- Que advertí a los comparecientes que deberán acreditarme a más tardar dentro del mes siguiente a la fecha de firma del presente instrumento, haber presentado la solicitud de inscripción de la sociedad que por este instrumento se constituye en el Registro Federal de Contribuyentes, y que en caso de no exhibirme dicha solicitud, procederé a dar el aviso correspondiente a las autoridades fiscales competentes.`});
-  B.push({type:'paragraph', text:`VI.- Que leído y explicado este instrumento a los comparecientes, habiéndoles hecho saber el derecho que tienen de leerlo por sí mismos, manifestaron su plena comprensión y conformidad con él, y lo firmaron el día de su fecha, mismo momento en que lo AUTORIZO DEFINITIVAMENTE. Doy fe.`});
-
-  // FIRMAS
-  B.push({type:'spacer'});
-  B.push({type:'spacer'});
-  socios.forEach(s=>{
-    B.push({type:'signature', text:'_______________________________________'});
-    B.push({type:'signature', text:(s.nombre||'[SOCIO]').toUpperCase()});
-    B.push({type:'spacer'});
-  });
-  B.push({type:'signature', text:'_______________________________________'});
-  B.push({type:'signature', text:'LIC. JOSÉ MANUEL GÓMEZ DEL CAMPO GURZA', bold:true});
-  B.push({type:'signature', text:'Notario Público Número 149 del Estado de México'});
-
-  return B;
-}
-
-function blocksToPlainText(blocks){
-  return blocks.map(b=>{
-    if(b.type==='spacer') return '';
-    return b.text;
-  }).join('\n\n');
-}
-
-/* ========= VISTA PREVIA ========= */
-function preview(){
-  const blocks = buildInstrumentBlocks();
-  document.getElementById('modalBody').textContent = blocksToPlainText(blocks);
-  document.getElementById('modal').classList.add('show');
-}
-function closeModal(){
-  document.getElementById('modal').classList.remove('show');
-}
-
-/* ========= GENERACIÓN DOCX (Open XML via JSZip) ========= */
-
-function xmlEsc(s){
-  if(s===null||s===undefined) return '';
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&apos;')
-    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');
-}
-
-function makeRun(text, bold, sz){
-  const b = bold ? '<w:b/><w:bCs/>' : '';
-  const size = sz || 22;
-  return `<w:r><w:rPr>${b}<w:sz w:val="${size}"/><w:szCs w:val="${size}"/><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/></w:rPr><w:t xml:space="preserve">${xmlEsc(text)}</w:t></w:r>`;
-}
-
-function makePara(runs, jc, spaceBefore, spaceAfter, lineRule, lineVal){
-  const jcXml = jc ? `<w:jc w:val="${jc}"/>` : '';
-  const sb = spaceBefore!=null ? `w:before="${spaceBefore}"` : '';
-  const sa = spaceAfter!=null ? `w:after="${spaceAfter}"` : '';
-  const lr = lineRule ? `w:lineRule="${lineRule}" w:line="${lineVal||440}"` : '';
-  const spacing = (sb||sa||lr) ? `<w:spacing ${sb} ${sa} ${lr}/>` : '';
-  return `<w:p><w:pPr>${jcXml}${spacing}<w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/></w:rPr></w:pPr>${runs}</w:p>`;
-}
-
-function blocksToDocXml(blocks){
-  let body = '';
-  for(const b of blocks){
-    if(b.type==='spacer'){
-      body += makePara(makeRun('',false,22), '', 0, 80, '', '');
-      continue;
-    }
-    const txt = b.text || '';
-    switch(b.type){
-      case 'header':
-        body += makePara(makeRun(txt,true,22), 'left', 0, 60, 'auto', '440');
-        break;
-      case 'subtitle':
-        body += makePara(makeRun(txt,true,22), 'center', 200, 120, 'auto', '440');
-        break;
-      case 'article':{
-        const m = txt.match(/^(ARTÍCULO\s+[A-ZÁÉÍÓÚÑ\s]+?\.-)\s*([\s\S]*)$/);
-        let runs;
-        if(m){
-          runs = makeRun(m[1]+' ', true, 22) + makeRun(m[2], false, 22);
-        } else {
-          runs = makeRun(txt, !!b.bold, 22);
-        }
-        body += makePara(runs, 'both', 100, 100, 'auto', '440');
-        break;
-      }
-      case 'signature':
-        body += makePara(makeRun(txt, !!b.bold, 22), 'center', 0, 60, 'auto', '440');
-        break;
-      case 'paragraph':
-      default:
-        body += makePara(makeRun(txt, !!b.bold, 22), 'both', 100, 100, 'auto', '440');
-        break;
-    }
-  }
-  // Sección con márgenes (en twentieths of a point = twips; 1 pulgada = 1440 twips)
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas"
-  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  xmlns:o="urn:schemas-microsoft-com:office:office"
-  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
-  xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"
-  xmlns:v="urn:schemas-microsoft-com:vml"
-  xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing"
-  xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
-  xmlns:w10="urn:schemas-microsoft-com:office:word"
-  xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
-  xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"
-  xmlns:wpg="http://schemas.microsoft.com/office/word/2010/wordprocessingGroup"
-  xmlns:wpi="http://schemas.microsoft.com/office/word/2010/wordprocessingInk"
-  xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml"
-  xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape"
-  mc:Ignorable="w14 wp14">
-<w:body>
-${body}
-<w:sectPr>
-  <w:pgSz w:w="12240" w:h="15840"/>
-  <w:pgMar w:top="1728" w:right="1440" w:bottom="1728" w:left="1728" w:header="720" w:footer="720" w:gutter="0"/>
-</w:sectPr>
-</w:body>
-</w:document>`;
-}
-
-function makeRels(){
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
-</Relationships>`;
-}
-
-function makeStyles(){
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-  <w:docDefaults>
-    <w:rPrDefault>
-      <w:rPr>
-        <w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
-        <w:sz w:val="22"/><w:szCs w:val="22"/>
-      </w:rPr>
-    </w:rPrDefault>
-  </w:docDefaults>
-</w:styles>`;
-}
-
-function makeContentTypes(){
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-  <Default Extension="xml" ContentType="application/xml"/>
-  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
-  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
-</Types>`;
-}
-
-function makeRootRels(){
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
-</Relationships>`;
-}
-
-async function downloadDocx(){
-  if(typeof JSZip === 'undefined'){
-    showToast('Cargando librerías, reintenta en 2 seg…');
-    return;
-  }
-  showToast('Generando documento…');
-  try{
-    const data = collectData();
-    const blocks = buildInstrumentBlocks();
-    const docXml = blocksToDocXml(blocks);
-
-    const zip = new JSZip();
-    zip.file('[Content_Types].xml', makeContentTypes());
-    zip.file('_rels/.rels', makeRootRels());
-    zip.file('word/document.xml', docXml);
-    zip.file('word/styles.xml', makeStyles());
-    zip.file('word/_rels/document.xml.rels', makeRels());
-
-    const blob = await zip.generateAsync({
-      type:'blob',
-      mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      compression:'DEFLATE',
-      compressionOptions:{level:6}
-    });
-
-    const empresaSafe = (data.empresa||'instrumento').replace(/[^a-zA-Z0-9_\-]/g,'_').substring(0,40);
-    const numSafe = (data.numInstrumento||'sn').replace(/[^a-zA-Z0-9_\-]/g,'_');
-    const filename = `Instrumento_${numSafe}_${empresaSafe}.docx`;
-
-    // Descarga directa con <a>
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 2000);
-    showToast('✓ Documento descargado correctamente');
-  }catch(e){
-    console.error('DOCX error:', e);
-    showToast('Error: '+e.message);
-  }
-}
-
-/* ========= EXPEDIENTES ========= */
-function saveExpediente(){
-  const data = collectData();
-  // Pre-llenar nombre
-  const def = (data.empresa||'').toUpperCase() + (data.numInstrumento?` — Instr. ${data.numInstrumento}`:'');
-  const exp = currentExpedienteId && allExpedientes[currentExpedienteId];
-  document.getElementById('saveExpName').value = (exp && exp.name) || def || `Expediente ${new Date().toLocaleDateString('es-MX')}`;
-  document.getElementById('saveExpNotes').value = (exp && exp.notes) || '';
-  document.getElementById('saveExpStatus').value = (exp && exp.status) || 'borrador';
-  document.getElementById('modalSave').classList.add('show');
-}
-
-function closeSaveModal(){
-  document.getElementById('modalSave').classList.remove('show');
-}
-
-async function confirmSaveExpediente(){
-  const name = document.getElementById('saveExpName').value.trim();
-  if(!name){showToast('Ingresa un nombre');return;}
-  const notes = document.getElementById('saveExpNotes').value.trim();
-  const status = document.getElementById('saveExpStatus').value;
-  const data = collectData();
-  const id = currentExpedienteId || ('exp_'+Date.now()+'_'+Math.random().toString(36).slice(2,8));
-  const now = new Date().toISOString();
-  const existing = allExpedientes[id];
-
-  allExpedientes[id] = {
-    id,
-    name,
-    notes,
-    status,
-    data,
-    createdAt: existing ? existing.createdAt : now,
-    updatedAt: now
-  };
-
-  await persistAll();
-  currentExpedienteId = id;
-  updateLoadedBanner();
-  updateExpCount();
-  closeSaveModal();
-  showToast(existing ? 'Expediente actualizado' : 'Expediente guardado');
-}
-
-async function deleteExpediente(id, ev){
-  if(ev){ev.stopPropagation();}
-  if(!confirm('¿Eliminar este expediente? La acción no se puede deshacer.')) return;
-  delete allExpedientes[id];
-  if(currentExpedienteId===id){
-    currentExpedienteId = null;
-    updateLoadedBanner();
-  }
-  await persistAll();
-  renderExpedientes();
-  updateExpCount();
-  showToast('Expediente eliminado');
-}
-
-function loadExpediente(id){
-  const exp = allExpedientes[id];
-  if(!exp) return;
-  fillForm(exp.data);
-  currentExpedienteId = id;
-  updateLoadedBanner();
-  switchTab('form');
-  showToast(`Cargado: ${exp.name}`);
-}
-
-async function duplicateExpediente(id, ev){
-  if(ev){ev.stopPropagation();}
-  const exp = allExpedientes[id];
-  if(!exp) return;
-  const newId = 'exp_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
-  const now = new Date().toISOString();
-  allExpedientes[newId] = {
-    ...JSON.parse(JSON.stringify(exp)),
-    id:newId,
-    name: exp.name + ' (copia)',
-    createdAt: now,
-    updatedAt: now,
-    status: 'borrador'
-  };
-  await persistAll();
-  renderExpedientes();
-  updateExpCount();
-  showToast('Expediente duplicado');
-}
-
-function newExpediente(){
-  if(currentExpedienteId || hasFormData()){
-    if(!confirm('¿Iniciar un nuevo expediente? Los cambios no guardados se perderán.')) return;
-  }
-  ['numInstrumento','numVolumen','numFolios','dia','mes','anio','empresa','cud','fechaCud','duracion','ciudadEstado','objeto','capitalMonto','capitalAcciones','valorNominal','adminNombre','adminRFC','comisarioNombre','comisarioRFC'].forEach(id=>{
-    document.getElementById(id).value='';
-  });
-  socios = [];
-  renderSocios();
-  addSocio();
-  currentExpedienteId = null;
-  updateLoadedBanner();
-  showToast('Nuevo expediente iniciado');
-}
-
-function hasFormData(){
-  const d = collectData();
-  return d.empresa || d.numInstrumento || (d.socios && d.socios.some(s=>s.nombre));
-}
-
-function updateLoadedBanner(){
-  const banner = document.getElementById('loadedBanner');
-  if(currentExpedienteId && allExpedientes[currentExpedienteId]){
-    banner.style.display = 'flex';
-    document.getElementById('loadedName').textContent = allExpedientes[currentExpedienteId].name;
+function numeroALetra(num, femenino = false) {
+  if (num === 0) return 'cero';
+  if (isNaN(num)) return '';
+  const neg = num < 0;
+  const n = Math.abs(Math.floor(num));
+  let r = '';
+  if (n >= 1000000) {
+    const m = Math.floor(n/1000000), re = n%1000000;
+    r = m === 1 ? 'un millón' : convertirMenorMil(m) + ' millones';
+    if (re > 0) r += ' ' + numeroALetra(re, femenino);
+  } else if (n >= 1000) {
+    const m = Math.floor(n/1000), re = n%1000;
+    r = m === 1 ? 'mil' : convertirMenorMil(m) + ' mil';
+    if (re > 0) r += ' ' + convertirMenorMil(re);
   } else {
-    banner.style.display = 'none';
+    r = convertirMenorMil(n);
   }
+  if (femenino) { r = r.replace(/\buno\b/g,'una').replace(/\bveintiuno\b/g,'veintiuna'); }
+  return neg ? 'menos ' + r : r;
 }
 
-function statusLabel(s){
-  return s==='protocolizado'?'Protocolizado':(s==='revision'?'En Revisión':'Borrador');
+function monedaALetra(cantidad) {
+  const e = Math.floor(cantidad);
+  const c = Math.round((cantidad - e) * 100);
+  return numeroALetra(e) + ' pesos ' + c.toString().padStart(2,'0') + '/100 moneda nacional';
 }
 
-function renderExpedientes(){
-  const list = document.getElementById('expedienteList');
-  const search = document.getElementById('searchExp').value.trim().toLowerCase();
-  const ids = Object.keys(allExpedientes);
+function caracteresALetra(texto) {
+  const MAP = {A:'A',B:'B',C:'C',D:'D',E:'E',F:'F',G:'G',H:'H',I:'I',J:'J',K:'K',L:'L',M:'M',N:'N','Ñ':'Ñ',O:'O',P:'P',Q:'Q',R:'R',S:'S',T:'T',U:'U',V:'V',W:'doble u',X:'X',Y:'Y',Z:'Z','0':'cero','1':'uno','2':'dos','3':'tres','4':'cuatro','5':'cinco','6':'seis','7':'siete','8':'ocho','9':'nueve'};
+  return (texto||'').toUpperCase().split('').map(c => MAP[c]||c).join(', ');
+}
 
-  if(ids.length===0){
-    list.innerHTML = `
-      <div class="empty-state">
-        <div class="ornament">❦</div>
-        <h3>Sin expedientes guardados</h3>
-        <p>Cuando guardes un expediente desde la pestaña «Nuevo Instrumento», aparecerá aquí para que puedas continuar trabajando con él más adelante.</p>
-        <button class="btn primary" onclick="switchTab('form')">Crear Nuevo Instrumento</button>
-      </div>
-    `;
-    return;
+function anioALetra(a) {
+  if (a >= 2000 && a < 2100) {
+    const d = a - 2000;
+    return d === 0 ? 'dos mil' : 'dos mil ' + decenaSimpleALetra(d);
   }
+  if (a >= 1900 && a < 2000) {
+    const d = a - 1900;
+    return d === 0 ? 'mil novecientos' : 'mil novecientos ' + decenaSimpleALetra(d);
+  }
+  return a.toString();
+}
+function decenaSimpleALetra(n) {
+  if (n < 20) return UNIDADES[n];
+  const d = Math.floor(n/10), u = n%10;
+  if (u === 0) return DECENAS[d];
+  if (d === 2) return 'veinti' + UNIDADES[u];
+  return DECENAS[d] + ' y ' + UNIDADES[u];
+}
 
-  // Ordenar por updatedAt descendente
-  ids.sort((a,b)=>{
-    const ea=allExpedientes[a], eb=allExpedientes[b];
-    return (eb.updatedAt||'').localeCompare(ea.updatedAt||'');
-  });
+function fechaALetra(fechaStr) {
+  const d = new Date(fechaStr + 'T12:00:00');
+  const dia = d.getDate(), mes = d.getMonth(), anio = d.getFullYear();
+  return (DIAS_LETRA[dia]||dia) + ' de ' + MESES[mes] + ' de ' + anioALetra(anio);
+}
 
-  let filtered = ids;
-  if(search){
-    filtered = ids.filter(id=>{
-      const e = allExpedientes[id];
-      const haystack = [
-        e.name, e.notes,
-        e.data?.empresa, e.data?.numInstrumento, e.data?.numVolumen,
-        ...(e.data?.socios?.map(s=>s.nombre)||[])
-      ].join(' ').toLowerCase();
-      return haystack.includes(search);
+function parsearFechaInstrumento(fechaISO) {
+  const d = new Date(fechaISO + 'T12:00:00');
+  const dia = d.getDate(), mes = d.getMonth(), anio = d.getFullYear();
+  return {
+    dia: dia.toString(), mes: MESES[mes], anio: anio.toString(),
+    diaLetra: DIAS_LETRA[dia]||dia.toString(),
+    mesLetra: MESES[mes],
+    anioLetra: anioALetra(anio),
+    completa: fechaALetra(fechaISO)
+  };
+}
+
+function formatearEstadoCivil(ec, genero) {
+  const ec2 = (ec||'').toLowerCase().trim();
+  const mapa = {
+    masculino: {soltero:'soltero',soltera:'soltero',casado:'casado',casada:'casado',divorciado:'divorciado',divorciada:'divorciado',viudo:'viudo',viuda:'viudo','unión libre':'en unión libre','union libre':'en unión libre'},
+    femenino:  {soltero:'soltera',soltera:'soltera',casado:'casada',casada:'casada',divorciado:'divorciada',divorciada:'divorciada',viudo:'viuda',viuda:'viuda','unión libre':'en unión libre','union libre':'en unión libre'},
+  };
+  return (mapa[genero]||mapa.masculino)[ec2] || ec;
+}
+
+function generarTextoCuGenerales(d) {
+  const fem = d.genero === 'femenino';
+  const orig = fem ? 'originaria' : 'originario';
+  const fechaLetra = fechaALetra(d.fecha_nacimiento);
+  const ec = formatearEstadoCivil(d.estado_civil, d.genero);
+  const dom = [d.domicilio_calle, d.domicilio_numero ? 'número '+d.domicilio_numero : '', d.domicilio_colonia ? 'Colonia '+d.domicilio_colonia : '', d.domicilio_cp ? 'Código Postal '+d.domicilio_cp : '', d.domicilio_ciudad ? 'en la ciudad de '+d.domicilio_ciudad : '', d.domicilio_estado].filter(Boolean).join(', ');
+  const claveLetra = d.clave_elector ? ', con Clave de Elector: ' + caracteresALetra(d.clave_elector) : '';
+  const curpLetra = caracteresALetra(d.curp||'');
+  const rfcLetra = caracteresALetra(d.rfc||'');
+
+  return d.nombre_completo.toUpperCase() +
+    ', de nacionalidad ' + d.nacionalidad +
+    ', de padres ' + (d.nacionalidad_padres||'mexicanos') +
+    ', ' + orig + ' de ' + d.lugar_nacimiento + ', lugar donde nació el día ' + fechaLetra +
+    ', ' + ec + ', ' + d.profesion +
+    ', con domicilio en ' + dom +
+    ', quien se identifica con ' + (d.tipo_identificacion||'Credencial para Votar') + ' vigente expedida por ' + (d.autoridad_identificacion||'el Instituto Nacional Electoral') +
+    claveLetra +
+    ', la cual agrego en copia fotostática al apéndice de este instrumento con la letra que le "' + (d.anexo_identificacion||'D') + '", certificando que dicha copia es reproducción fiel y exacta de su original con el que fue debidamente cotejada' +
+    '; con Clave Única de Registro de Población: ' + curpLetra +
+    '; y con Registro Federal de Contribuyentes: ' + rfcLetra + '.';
+}
+
+// ============================================================
+// STORAGE
+// ============================================================
+const DB = {
+  get: k => { try { return JSON.parse(localStorage.getItem(k)||'[]'); } catch(e) { return []; } },
+  getObj: k => { try { return JSON.parse(localStorage.getItem(k)||'null'); } catch(e) { return null; } },
+  set: (k,v) => localStorage.setItem(k, JSON.stringify(v)),
+  getOne: (k,id) => DB.get(k).find(i => i.id === id),
+  save: (k, item) => {
+    const items = DB.get(k);
+    const idx = items.findIndex(i => i.id === item.id);
+    if (idx >= 0) items[idx] = item; else items.push(item);
+    DB.set(k, items);
+    return item;
+  },
+  del: (k, id) => DB.set(k, DB.get(k).filter(i => i.id !== id))
+};
+
+function uid() {
+  return crypto.randomUUID ? crypto.randomUUID() :
+    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random()*16|0;
+      return (c==='x'?r:(r&0x3|0x8)).toString(16);
     });
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function seedUsuarios() {
+  if (DB.get('notaria_users').length > 0) return;
+  const users = [
+    { id: uid(), name:'Admin', email:'admin@notaria149.mx', password: await sha256('Admin@Notaria2024'), role:'ADMIN', active:true },
+    { id: uid(), name:'Capturista', email:'capturista@notaria149.mx', password: await sha256('Capturista@2024'), role:'CAPTURISTA', active:true },
+    { id: uid(), name:'Consulta', email:'consulta@notaria149.mx', password: await sha256('Consulta@2024'), role:'CONSULTA', active:true },
+  ];
+  DB.set('notaria_users', users);
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  errEl.classList.add('hidden');
+  if (!email || !pass) { errEl.textContent='Ingresa correo y contraseña'; errEl.classList.remove('hidden'); return; }
+  btn.innerHTML = '<span class="spinner"></span> Verificando...';
+  btn.disabled = true;
+  try {
+    const hash = await sha256(pass);
+    const users = DB.get('notaria_users');
+    const user = users.find(u => u.email === email && u.password === hash && u.active);
+    if (!user) { errEl.textContent='Credenciales incorrectas o usuario inactivo'; errEl.classList.remove('hidden'); return; }
+    DB.set('notaria_session', user);
+    APP.user = user;
+    showApp();
+    navigate('dashboard');
+  } catch(e) {
+    errEl.textContent='Error al iniciar sesión'; errEl.classList.remove('hidden');
+  } finally {
+    btn.innerHTML = 'Iniciar sesión';
+    btn.disabled = false;
   }
+}
 
-  if(filtered.length===0){
-    list.innerHTML = `<div class="empty-state"><div class="ornament">❦</div><h3>Sin resultados</h3><p>No hay expedientes que coincidan con tu búsqueda.</p></div>`;
-    return;
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('page-login') && !document.getElementById('page-login').classList.contains('hidden')) {
+    doLogin();
   }
-
-  let html = '<div class="expediente-grid">';
-  filtered.forEach(id=>{
-    const e = allExpedientes[id];
-    const d = e.data || {};
-    const fecha = e.updatedAt ? new Date(e.updatedAt).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-    const sociosCount = (d.socios||[]).length;
-    const empresa = d.empresa || '—';
-    const inst = d.numInstrumento ? `Instr. ${d.numInstrumento}` : 'Sin número';
-
-    html += `
-      <div class="exp-card ${e.status==='protocolizado'?'protocolizado':''}" onclick="loadExpediente('${id}')">
-        <div class="exp-title">${escHTML(e.name)} <span class="status-pill">${statusLabel(e.status||'borrador')}</span></div>
-        <div class="exp-meta">${escHTML(inst)} <span class="sep">·</span> ${escHTML(fecha)}</div>
-        <div class="exp-info">
-          <strong>Empresa:</strong> ${escHTML(empresa)}<br>
-          <strong>Socios:</strong> ${sociosCount}
-          ${e.notes ? `<br><strong>Notas:</strong> <em>${escHTML(e.notes.slice(0,100))}${e.notes.length>100?'…':''}</em>` : ''}
-        </div>
-        <div class="exp-actions" onclick="event.stopPropagation()">
-          <button class="btn small primary" onclick="loadExpediente('${id}')">Editar</button>
-          <button class="btn small ghost" onclick="duplicateExpediente('${id}', event)">Duplicar</button>
-          <button class="btn small danger" onclick="deleteExpediente('${id}', event)">Eliminar</button>
-        </div>
-      </div>
-    `;
-  });
-  html += '</div>';
-  list.innerHTML = html;
-}
-
-function escHTML(v){
-  if(v===null||v===undefined) return '';
-  return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(()=>t.classList.remove('show'),2800);
-}
-
-/* ========= EVENTS ========= */
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeModal();closeSaveModal();}
 });
 
-document.addEventListener('input', (ev)=>{
-  if(ev.target.id==='valorNominal'){
-    const vn = parseFloat(ev.target.value)||0;
-    socios.forEach(s=>{
-      const ac = parseFloat(s.acciones)||0;
-      if(vn>0 && ac>0){
-        s.importe = ac*vn;
-        const inp=document.querySelector(`[data-sid="${s.id}"][data-field="importe"]`);
-        if(inp) inp.value = s.importe;
-      }
-    });
-    updateTotals();
-  } else if(['capitalMonto','capitalAcciones'].includes(ev.target.id)){
-    updateTotals();
-  }
-});
+function doLogout() {
+  localStorage.removeItem('notaria_session');
+  APP.user = null;
+  document.getElementById('page-app').classList.add('hidden');
+  document.getElementById('page-login').classList.remove('hidden');
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-pass').value = '';
+}
 
-/* ========= INIT ========= */
-(async function init(){
-  await loadAllExpedientes();
-  updateExpCount();
-  addSocio();
-})();
+// ============================================================
+// APP STATE & NAVIGATION
+// ============================================================
+const APP = { user: null, route: 'dashboard' };
+
+function showApp() {
+  document.getElementById('page-login').classList.add('hidden');
+  document.getElementById('page-app').classList.remove('hidden');
+  const u = APP.user;
+  document.getElementById('user-initials').textContent = u.name.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('user-name').textContent = u.name;
+  const roleLabels = { ADMIN:'Administrador', CAPTURISTA:'Capturista', CONSULTA:'Solo lectura' };
+  document.getElementById('user-role').textContent = roleLabels[u.role]||u.role;
+  if (u.role === 'ADMIN') {
+    document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+  }
+}
+
+function navigate(route, params = {}) {
+  APP.route = route;
+  APP.params = params;
+  document.querySelectorAll('.sidebar-link[data-route]').forEach(el => {
+    el.classList.toggle('active', el.dataset.route === route.split('/')[0]);
+  });
+  renderPage(route, params);
+}
+
+function renderPage(route, params = {}) {
+  const content = document.getElementById('content');
+  const title = document.getElementById('page-title');
+  const actions = document.getElementById('page-actions');
+  actions.innerHTML = '';
+  content.innerHTML = '<div class="flex items-center justify-center h-32 text-gray-400">Cargando...</div>';
+  const r = route.split('/')[0];
+  const titles = { dashboard:'Dashboard', instrumentos:'Instrumentos', plantillas:'Plantillas', usuarios:'Usuarios', configuracion:'Configuración', 'instrumento-form':'Instrumento' };
+  title.textContent = titles[r] || r;
+  switch(r) {
+    case 'dashboard': renderDashboard(); break;
+    case 'instrumentos': renderInstrumentos(); break;
+    case 'instrumento-form': renderInstrumentoForm(params.id); break;
+    case 'plantillas': renderPlantillas(); break;
+    case 'usuarios': renderUsuarios(); break;
+    case 'configuracion': renderConfiguracion(); break;
+    default: content.innerHTML = '<p class="text-gray-500">Página no encontrada</p>';
+  }
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg, type = 'success') {
+  const container = document.getElementById('toast');
+  const el = document.createElement('div');
+  el.className = 'toast-item';
+  el.style.background = type === 'error' ? '#dc2626' : type === 'warning' ? '#d97706' : '#1f2937';
+  el.textContent = msg;
+  container.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3500);
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function showModal(html) {
+  const c = document.getElementById('modal-container');
+  c.innerHTML = `<div class="modal-overlay" onclick="if(event.target===this)closeModal()">${html}</div>`;
+}
+function closeModal() { document.getElementById('modal-container').innerHTML = ''; }
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const plantillas = DB.get('notaria_plantillas');
+  const instrumentos = DB.get('notaria_instrumentos');
+  const recientes = instrumentos.slice(-5).reverse();
+  const statusBadge = { BORRADOR:'badge-gray', GENERADO:'badge-blue', REVISADO:'badge-yellow', FIRMADO:'badge-green', ARCHIVADO:'badge-purple' };
+
+  document.getElementById('page-actions').innerHTML = '';
+  document.getElementById('content').innerHTML = `
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      ${statCard('Instrumentos', instrumentos.length, '#2563eb', 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z')}
+      ${statCard('Plantillas', plantillas.length, '#059669', 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z')}
+      ${statCard('Generados', instrumentos.filter(i=>i.status==='GENERADO'||i.status==='FIRMADO'||i.status==='ARCHIVADO').length, '#7c3aed', 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2')}
+      ${statCard('Borradores', instrumentos.filter(i=>i.status==='BORRADOR').length, '#d97706', 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z')}
+    </div>
+    <div class="card p-5">
+      <h2 class="font-semibold text-gray-900 mb-4">Instrumentos recientes</h2>
+      ${recientes.length === 0 ? '<p class="text-gray-400 text-sm text-center py-8">Sin instrumentos aún. <a onclick="navigate(\'instrumento-form\')" class="text-blue-600 cursor-pointer hover:underline">Crear el primero</a></p>' : `
+        <table class="w-full text-sm">
+          <thead><tr class="text-left text-xs text-gray-500 border-b border-gray-200">
+            <th class="pb-2 pr-4">Número</th><th class="pb-2 pr-4">Empresa</th><th class="pb-2 pr-4">Fecha</th><th class="pb-2">Estado</th>
+          </tr></thead>
+          <tbody>
+            ${recientes.map(i => `<tr class="table-row border-b border-gray-100 cursor-pointer" onclick="navigate('instrumento-form',{id:'${i.id}'})">
+              <td class="py-2.5 pr-4 font-mono text-blue-700">${i.numero_instrumento||'—'}</td>
+              <td class="py-2.5 pr-4 font-medium">${(i.nombre_empresa||'—').slice(0,35)}</td>
+              <td class="py-2.5 pr-4 text-gray-500">${i.fecha_instrumento||'—'}</td>
+              <td class="py-2.5"><span class="badge ${statusBadge[i.status]||'badge-gray'}">${i.status||'BORRADOR'}</span></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      `}
+    </div>`;
+}
+
+function statCard(label, value, color, icon) {
+  return `<div class="card p-5 flex items-center gap-4">
+    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background:${color}18">
+      <svg class="w-6 h-6" style="color:${color}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icon}"/></svg>
+    </div>
+    <div><p class="text-2xl font-bold text-gray-900">${value}</p><p class="text-sm text-gray-500">${label}</p></div>
+  </div>`;
+}
+
+// ============================================================
+// PLANTILLAS
+// ============================================================
+function renderPlantillas() {
+  const plantillas = DB.get('notaria_plantillas');
+  const canEdit = APP.user.role !== 'CONSULTA';
+
+  document.getElementById('page-actions').innerHTML = canEdit
+    ? `<button onclick="showUploadPlantilla()" class="btn btn-primary">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Nueva Plantilla
+      </button>` : '';
+
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      ${plantillas.length === 0 ? `<div class="p-12 text-center">
+        <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <p class="text-gray-500 mb-3">No hay plantillas aún</p>
+        ${canEdit ? `<button onclick="showUploadPlantilla()" class="btn btn-primary">Subir primera plantilla</button>` : ''}
+      </div>` : `
+        <table class="w-full text-sm">
+          <thead><tr class="text-left text-xs text-gray-500 border-b border-gray-200 bg-gray-50">
+            <th class="px-5 py-3">Nombre</th><th class="px-5 py-3">Tipo</th><th class="px-5 py-3">Variables</th><th class="px-5 py-3">Fecha</th><th class="px-5 py-3"></th>
+          </tr></thead>
+          <tbody>
+            ${plantillas.map(p => `<tr class="table-row border-b border-gray-100">
+              <td class="px-5 py-3 font-medium text-gray-900">${p.nombre}</td>
+              <td class="px-5 py-3"><span class="badge badge-blue">${p.tipo||'General'}</span></td>
+              <td class="px-5 py-3 text-gray-500">${(p.variables||[]).length} variables</td>
+              <td class="px-5 py-3 text-gray-500">${(p.fecha||'').slice(0,10)}</td>
+              <td class="px-5 py-3 text-right">
+                <button onclick="descargarPlantilla('${p.id}')" class="btn btn-secondary text-xs py-1 px-3 mr-1">Descargar</button>
+                ${canEdit ? `<button onclick="eliminarPlantilla('${p.id}')" class="btn btn-danger text-xs py-1 px-3">Eliminar</button>` : ''}
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      `}
+    </div>`;
+}
+
+function showUploadPlantilla() {
+  showModal(`<div class="modal p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold text-gray-900">Subir Nueva Plantilla</h2>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">✕</button>
+    </div>
+    <div class="alert alert-warning">El archivo .docx se almacena en tu navegador (localStorage). Límite ~5MB por plantilla.</div>
+    <div class="form-group">
+      <label class="form-label required">Nombre de la plantilla</label>
+      <input id="pla-nombre" class="form-input" placeholder="Ej: Constitución de S.A. de C.V.">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tipo</label>
+      <select id="pla-tipo" class="form-select">
+        <option>Sociedad Anónima</option>
+        <option>Sociedad de R.L.</option>
+        <option>Compraventa</option>
+        <option>Poder Notarial</option>
+        <option>Testamento</option>
+        <option>General</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label required">Archivo .docx</label>
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault();this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="handleFileDrop(event)">
+        <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+        <p class="text-gray-500 text-sm">Arrastra un .docx aquí o <span class="text-blue-600">haz clic</span></p>
+        <p id="file-name" class="text-xs text-gray-400 mt-1"></p>
+      </div>
+      <input id="file-input" type="file" accept=".docx" class="hidden" onchange="handleFileSelect(event)">
+    </div>
+    <div class="flex gap-3 justify-end">
+      <button onclick="closeModal()" class="btn btn-secondary">Cancelar</button>
+      <button onclick="guardarPlantilla()" class="btn btn-primary" id="btn-guardar-plantilla">Guardar Plantilla</button>
+    </div>
+  </div>`);
+}
+
+let currentFileData = null;
+function handleFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+}
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processFile(file);
+}
+function processFile(file) {
+  if (!file.name.endsWith('.docx')) { toast('Solo se aceptan archivos .docx', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    currentFileData = { name: file.name, data: e.target.result };
+    document.getElementById('file-name').textContent = file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
+  };
+  reader.readAsDataURL(file);
+}
+
+function detectarVariablesDeBase64(base64) {
+  try {
+    const b64 = base64.split(',')[1] || base64;
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const zip = new PizZip(bytes);
+    let xml = '';
+    ['word/document.xml','word/header1.xml','word/footer1.xml'].forEach(f => { if(zip.files[f]) xml += zip.files[f].asText(); });
+    const re = /\{\{([^{}#/][^{}]*)\}\}/g;
+    const vars = new Set();
+    let m;
+    while ((m = re.exec(xml)) !== null) vars.add(m[1].trim());
+    return Array.from(vars);
+  } catch(e) { return []; }
+}
+
+async function guardarPlantilla() {
+  const nombre = document.getElementById('pla-nombre').value.trim();
+  const tipo = document.getElementById('pla-tipo').value;
+  if (!nombre) { toast('Ingresa un nombre para la plantilla', 'error'); return; }
+  if (!currentFileData) { toast('Selecciona un archivo .docx', 'error'); return; }
+  const btn = document.getElementById('btn-guardar-plantilla');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando...';
+  try {
+    const variables = detectarVariablesDeBase64(currentFileData.data);
+    const plantilla = { id: uid(), nombre, tipo, variables, fecha: new Date().toISOString(), contenido: currentFileData.data, nombreArchivo: currentFileData.name };
+    DB.save('notaria_plantillas', plantilla);
+    currentFileData = null;
+    closeModal();
+    toast('Plantilla guardada correctamente');
+    renderPlantillas();
+  } catch(e) { toast('Error al guardar plantilla: '+e.message, 'error'); }
+  finally { btn.disabled=false; btn.innerHTML='Guardar Plantilla'; }
+}
+
+function descargarPlantilla(id) {
+  const p = DB.getOne('notaria_plantillas', id);
+  if (!p) return;
+  const a = document.createElement('a');
+  a.href = p.contenido;
+  a.download = p.nombreArchivo || p.nombre + '.docx';
+  a.click();
+}
+
+function eliminarPlantilla(id) {
+  if (!confirm('¿Eliminar esta plantilla? Esta acción no se puede deshacer.')) return;
+  DB.del('notaria_plantillas', id);
+  toast('Plantilla eliminada');
+  renderPlantillas();
+}
+
+// ============================================================
+// INSTRUMENTOS — LIST
+// ============================================================
+function renderInstrumentos() {
+  const instrumentos = DB.get('notaria_instrumentos');
+  const canEdit = APP.user.role !== 'CONSULTA';
+  const statusBadge = { BORRADOR:'badge-gray', GENERADO:'badge-blue', REVISADO:'badge-yellow', FIRMADO:'badge-green', ARCHIVADO:'badge-purple' };
+
+  document.getElementById('page-actions').innerHTML = canEdit
+    ? `<button onclick="navigate('instrumento-form')" class="btn btn-primary">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Nuevo Instrumento
+      </button>` : '';
+
+  document.getElementById('content').innerHTML = `
+    <div class="card mb-4 p-4 flex gap-3 items-center">
+      <input id="instr-search" class="form-input flex-1" placeholder="Buscar por número o empresa..." oninput="filtrarInstrumentos()">
+      <select id="instr-status" class="form-select w-40" onchange="filtrarInstrumentos()">
+        <option value="">Todos los estados</option>
+        <option>BORRADOR</option><option>GENERADO</option><option>REVISADO</option><option>FIRMADO</option><option>ARCHIVADO</option>
+      </select>
+    </div>
+    <div class="card">
+      <div id="instr-table">
+        ${renderInstrumentosTable(instrumentos, statusBadge, canEdit)}
+      </div>
+    </div>`;
+}
+
+function renderInstrumentosTable(instrumentos, statusBadge, canEdit) {
+  if (!statusBadge) statusBadge = { BORRADOR:'badge-gray', GENERADO:'badge-blue', REVISADO:'badge-yellow', FIRMADO:'badge-green', ARCHIVADO:'badge-purple' };
+  if (canEdit === undefined) canEdit = APP.user.role !== 'CONSULTA';
+  if (instrumentos.length === 0) return `<div class="p-12 text-center">
+    <p class="text-gray-400 mb-3">No hay instrumentos</p>
+    ${canEdit ? `<button onclick="navigate('instrumento-form')" class="btn btn-primary">Crear instrumento</button>` : ''}
+  </div>`;
+  return `<table class="w-full text-sm">
+    <thead><tr class="text-left text-xs text-gray-500 border-b border-gray-200 bg-gray-50">
+      <th class="px-5 py-3">Número</th><th class="px-5 py-3">Empresa</th><th class="px-5 py-3">Fecha</th><th class="px-5 py-3">Socios</th><th class="px-5 py-3">Estado</th><th class="px-5 py-3"></th>
+    </tr></thead>
+    <tbody>
+      ${instrumentos.map(i=>`<tr class="table-row border-b border-gray-100">
+        <td class="px-5 py-3 font-mono text-blue-700 font-medium cursor-pointer hover:underline" onclick="navigate('instrumento-form',{id:'${i.id}'})">${i.numero_instrumento||'—'}</td>
+        <td class="px-5 py-3 font-medium text-gray-900 max-w-xs truncate">${i.nombre_empresa||'—'}</td>
+        <td class="px-5 py-3 text-gray-500">${i.fecha_instrumento||'—'}</td>
+        <td class="px-5 py-3 text-gray-500">${(i.socios||[]).length}</td>
+        <td class="px-5 py-3"><span class="badge ${statusBadge[i.status]||'badge-gray'}">${i.status||'BORRADOR'}</span></td>
+        <td class="px-5 py-3 text-right flex gap-1 justify-end">
+          ${canEdit ? `<button onclick="navigate('instrumento-form',{id:'${i.id}'})" class="btn btn-secondary text-xs py-1 px-3">Editar</button>` : `<button onclick="navigate('instrumento-form',{id:'${i.id}'})" class="btn btn-secondary text-xs py-1 px-3">Ver</button>`}
+          ${i.docxBlob ? `<button onclick="descargarInstrumento('${i.id}')" class="btn btn-success text-xs py-1 px-3">⬇ .docx</button>` : ''}
+          ${canEdit ? `<button onclick="eliminarInstrumento('${i.id}')" class="btn btn-danger text-xs py-1 px-3">✕</button>` : ''}
+        </td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+function filtrarInstrumentos() {
+  const q = document.getElementById('instr-search').value.toLowerCase();
+  const status = document.getElementById('instr-status').value;
+  let instrumentos = DB.get('notaria_instrumentos');
+  if (q) instrumentos = instrumentos.filter(i => (i.numero_instrumento||'').toLowerCase().includes(q) || (i.nombre_empresa||'').toLowerCase().includes(q));
+  if (status) instrumentos = instrumentos.filter(i => i.status === status);
+  document.getElementById('instr-table').innerHTML = renderInstrumentosTable(instrumentos);
+}
+
+function eliminarInstrumento(id) {
+  if (!confirm('¿Eliminar este instrumento? Esta acción no se puede deshacer.')) return;
+  DB.del('notaria_instrumentos', id);
+  toast('Instrumento eliminado');
+  renderInstrumentos();
+}
+
+// ============================================================
+// INSTRUMENTO FORM — 5 TABS
+// ============================================================
+let FORM = { socios: [], activeTab: 0, saving: false, generando: false, instrumento: null };
+
+function renderInstrumentoForm(id) {
+  const canEdit = APP.user.role !== 'CONSULTA';
+  const instrumento = id ? DB.getOne('notaria_instrumentos', id) : null;
+  FORM = { socios: instrumento?.socios ? JSON.parse(JSON.stringify(instrumento.socios)) : [newSocio(0)], activeTab: 0, saving: false, generando: false, instrumento };
+
+  document.getElementById('page-title').textContent = id ? 'Editar Instrumento' : 'Nuevo Instrumento';
+  document.getElementById('page-actions').innerHTML = `
+    <div class="flex gap-2">
+      <button onclick="navigate('instrumentos')" class="btn btn-secondary">← Volver</button>
+      ${canEdit ? `<button onclick="guardarInstrumento('${id||''}')" id="btn-save" class="btn btn-primary">Guardar</button>` : ''}
+    </div>`;
+
+  const plantillas = DB.get('notaria_plantillas');
+  const plantillaOptions = plantillas.map(p => `<option value="${p.id}" ${instrumento?.plantilla_id===p.id?'selected':''}>${p.nombre}</option>`).join('');
+
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <!-- TABS -->
+      <div class="flex gap-1 p-3 border-b border-gray-200 overflow-x-auto">
+        ${['Instrumento','Empresa','Capital','Socios','Administración'].map((t,i)=>`
+          <button class="tab-btn ${i===0?'active':''}" id="tab-${i}" onclick="switchTab(${i})">${i+1}. ${t}</button>`).join('')}
+      </div>
+      <!-- TAB CONTENTS -->
+      <div class="p-6">
+        <!-- TAB 0: Instrumento -->
+        <div id="tab-content-0">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label required">Número de instrumento</label>
+              <input id="f-numero" class="form-input" placeholder="Ej: 12,345" value="${instrumento?.numero_instrumento||''}">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Número de volumen</label>
+              <input id="f-volumen" class="form-input" placeholder="Ej: CCXLV" value="${instrumento?.numero_volumen||''}">
+            </div>
+            <div class="form-group">
+              <label class="form-label required">Fecha del instrumento</label>
+              <input id="f-fecha" class="form-input" type="date" value="${instrumento?.fecha_instrumento||''}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Ciudad de otorgamiento</label>
+              <input id="f-ciudad" class="form-input" placeholder="Ej: Metepec, Estado de México" value="${instrumento?.ciudad_otorgamiento||'Metepec, Estado de México'}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Plantilla .docx</label>
+              <select id="f-plantilla" class="form-select">
+                <option value="">— Sin plantilla —</option>
+                ${plantillaOptions}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Estado</label>
+              <select id="f-status" class="form-select">
+                ${['BORRADOR','GENERADO','REVISADO','FIRMADO','ARCHIVADO'].map(s=>`<option ${instrumento?.status===s?'selected':''}>${s}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        </div>
+        <!-- TAB 1: Empresa -->
+        <div id="tab-content-1" class="hidden">
+          <div class="form-group">
+            <label class="form-label required">Nombre de la empresa</label>
+            <input id="f-empresa" class="form-input" placeholder="Ej: INNOVACIÓN TECNOLÓGICA DEL VALLE, S.A. DE C.V." value="${instrumento?.nombre_empresa||''}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Objeto social</label>
+            <textarea id="f-objeto" class="form-textarea" rows="4" placeholder="La adquisición, arrendamiento, uso, compraventa...">${instrumento?.objeto_social||''}</textarea>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Duración de la sociedad</label>
+              <input id="f-duracion" class="form-input" placeholder="Ej: Noventa y nueve años" value="${instrumento?.duracion_sociedad||'Noventa y nueve años'}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Domicilio social</label>
+              <input id="f-domicilio-social" class="form-input" placeholder="Ej: Metepec, Estado de México" value="${instrumento?.domicilio_social||''}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descripción del capital (libre)</label>
+            <textarea id="f-desc-capital" class="form-textarea" rows="2" placeholder="El capital social se fija en...">${instrumento?.descripcion_capital||''}</textarea>
+          </div>
+        </div>
+        <!-- TAB 2: Capital -->
+        <div id="tab-content-2" class="hidden">
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label">Capital mínimo fijo ($)</label>
+              <input id="f-capital" class="form-input" type="number" placeholder="50000" value="${instrumento?.monto_capital||''}" oninput="actualizarCapitalLetra()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Número de acciones</label>
+              <input id="f-acciones" class="form-input" type="number" placeholder="50" value="${instrumento?.numero_acciones||''}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Valor nominal por acción ($)</label>
+              <input id="f-valor-nominal" class="form-input" type="number" placeholder="1000" value="${instrumento?.valor_nominal||''}">
+            </div>
+          </div>
+          <div id="capital-preview" class="alert alert-warning text-sm hidden"></div>
+          <div class="grid-2 mt-2">
+            <div class="form-group">
+              <label class="form-label">Capital mínimo fijo (en letra)</label>
+              <input id="f-capital-letra" class="form-input" placeholder="Se calcula automáticamente" value="${instrumento?.monto_capital_letra||''}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Acciones en letra</label>
+              <input id="f-acciones-letra" class="form-input" placeholder="Se calcula automáticamente" value="${instrumento?.numero_acciones_letra||''}">
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Puedes editar manualmente si el formato automático no es el correcto.</p>
+        </div>
+        <!-- TAB 3: Socios -->
+        <div id="tab-content-3" class="hidden">
+          <div class="flex justify-between items-center mb-4">
+            <p class="text-sm text-gray-600" id="socios-count">${FORM.socios.length} socio(s)</p>
+            ${canEdit ? `<button onclick="addSocio()" class="btn btn-secondary text-sm">+ Agregar socio</button>` : ''}
+          </div>
+          <div id="socios-container" class="space-y-3"></div>
+          <div class="mt-4 p-4 bg-gray-50 rounded-lg text-sm">
+            <div class="grid-3">
+              <div><p class="text-xs text-gray-500">Total acciones</p><p class="font-mono font-medium" id="total-acciones">0</p></div>
+              <div><p class="text-xs text-gray-500">Total importe</p><p class="font-mono font-medium" id="total-importe">$0.00</p></div>
+              <div><p class="text-xs text-gray-500">Capital declarado</p><p class="font-mono font-medium" id="capital-declarado">$0.00</p></div>
+            </div>
+          </div>
+        </div>
+        <!-- TAB 4: Administración -->
+        <div id="tab-content-4" class="hidden">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Nombre del Administrador Único</label>
+              <input id="f-admin" class="form-input" placeholder="Nombre completo" value="${instrumento?.nombre_administrador||''}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nombre del Comisario</label>
+              <input id="f-comisario" class="form-input" placeholder="Nombre completo" value="${instrumento?.nombre_comisario||''}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cargo del administrador</label>
+              <input id="f-cargo-admin" class="form-input" placeholder="Ej: Administrador Único" value="${instrumento?.cargo_administrador||'Administrador Único'}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Duración del cargo</label>
+              <input id="f-duracion-cargo" class="form-input" placeholder="Ej: Indefinido" value="${instrumento?.duracion_cargo||'Indefinido'}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Facultades del administrador</label>
+            <textarea id="f-facultades" class="form-textarea" rows="4" placeholder="Las facultades de dominio, administración, pleitos y cobranzas...">${instrumento?.facultades_administrador||''}</textarea>
+          </div>
+          <div class="mt-6 pt-6 border-t border-gray-200">
+            ${canEdit ? `
+            <div class="flex gap-3">
+              <button onclick="guardarInstrumento('${id||''}')" class="btn btn-primary">Guardar borrador</button>
+              <button onclick="generarDocumentoFinal('${id||''}')" id="btn-generar" class="btn btn-success">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                Generar Documento .docx
+              </button>
+              <button onclick="descargarInstrumento('${id||''}')" id="btn-download" class="btn btn-secondary ${instrumento?.docxBlob?'':'hidden'}">
+                ⬇ Descargar .docx
+              </button>
+            </div>` : `
+            <button onclick="descargarInstrumento('${id||''}')" class="btn btn-secondary ${instrumento?.docxBlob?'':'hidden'}">⬇ Descargar .docx</button>`}
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  renderSocios(canEdit);
+  actualizarCapitalLetra();
+}
+
+function switchTab(i) {
+  FORM.activeTab = i;
+  document.querySelectorAll('.tab-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  document.querySelectorAll('[id^="tab-content-"]').forEach((c,j)=>c.classList.toggle('hidden',j!==i));
+  if (i===3) renderSocios(APP.user.role!=='CONSULTA');
+}
+
+function actualizarCapitalLetra() {
+  const cap = parseFloat(document.getElementById('f-capital')?.value||'0');
+  const acc = parseInt(document.getElementById('f-acciones')?.value||'0');
+  if (cap > 0) {
+    document.getElementById('f-capital-letra').value = monedaALetra(cap);
+    const prev = document.getElementById('capital-preview');
+    if (prev) { prev.textContent = monedaALetra(cap); prev.classList.remove('hidden'); }
+  }
+  if (acc > 0) document.getElementById('f-acciones-letra').value = numeroALetra(acc) + (acc===1?' acción':' acciones');
+}
+
+// ============================================================
+// SOCIOS
+// ============================================================
+function newSocio(idx) {
+  return { _id: uid(), nombre_completo:'', genero:'masculino', nacionalidad:'mexicana', nacionalidad_padres:'mexicanos', lugar_nacimiento:'', fecha_nacimiento:'', estado_civil:'soltero', profesion:'', domicilio_calle:'', domicilio_numero:'', domicilio_colonia:'', domicilio_cp:'', domicilio_ciudad:'', domicilio_estado:'Estado de México', tipo_identificacion:'Credencial para Votar', autoridad_identificacion:'el Instituto Nacional Electoral', clave_elector:'', curp:'', rfc:'', numero_acciones:0, importe_acciones:0, anexo_identificacion:['D','E','F','G','H','I','J','K'][idx]||'D', texto_generales:'' };
+}
+
+function addSocio() {
+  FORM.socios.push(newSocio(FORM.socios.length));
+  renderSocios(true);
+}
+function removeSocio(idx) {
+  if (FORM.socios.length <= 1) { toast('Debe haber al menos un socio', 'warning'); return; }
+  FORM.socios.splice(idx,1);
+  renderSocios(true);
+}
+
+function toggleSocio(idx) {
+  const body = document.getElementById('socio-body-'+idx);
+  body.classList.toggle('open');
+  document.getElementById('socio-chevron-'+idx).style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
+}
+
+function renderSocios(canEdit) {
+  const container = document.getElementById('socios-container');
+  if (!container) return;
+  container.innerHTML = FORM.socios.map((s,i) => renderSocioCard(s, i, canEdit)).join('');
+  document.getElementById('socios-count').textContent = FORM.socios.length + ' socio(s)';
+  actualizarTotales();
+}
+
+function renderSocioCard(s, i, canEdit) {
+  return `<div class="socio-card">
+    <div class="socio-header" onclick="toggleSocio(${i})">
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-700">${i+1}</div>
+        <div>
+          <p class="font-medium text-gray-900 text-sm" id="socio-nombre-display-${i}">${s.nombre_completo||'Socio '+(i+1)}</p>
+          <p class="text-xs text-gray-500">${s.numero_acciones||0} acciones · $${(s.importe_acciones||0).toLocaleString()}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        ${canEdit?`<button onclick="event.stopPropagation();removeSocio(${i})" class="btn btn-danger text-xs py-1 px-2">Eliminar</button>`:''}
+        <svg id="socio-chevron-${i}" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
+    </div>
+    <div id="socio-body-${i}" class="socio-body ${i===0?'open':''}">
+      <div class="section-title">Datos personales</div>
+      <div class="grid-2">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label required">Nombre completo (en mayúsculas)</label>
+          <input class="form-input" value="${s.nombre_completo||''}" oninput="updateSocio(${i},'nombre_completo',this.value)" placeholder="JUAN PÉREZ GARCÍA">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Género</label>
+          <select class="form-select" onchange="updateSocio(${i},'genero',this.value)">
+            <option value="masculino" ${s.genero!=='femenino'?'selected':''}>Masculino</option>
+            <option value="femenino" ${s.genero==='femenino'?'selected':''}>Femenino</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado civil</label>
+          <select class="form-select" onchange="updateSocio(${i},'estado_civil',this.value)">
+            ${['soltero','casado','divorciado','viudo','unión libre'].map(ec=>`<option value="${ec}" ${s.estado_civil===ec?'selected':''}>${ec.charAt(0).toUpperCase()+ec.slice(1)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nacionalidad</label>
+          <input class="form-input" value="${s.nacionalidad||'mexicana'}" oninput="updateSocio(${i},'nacionalidad',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nacionalidad de los padres</label>
+          <input class="form-input" value="${s.nacionalidad_padres||'mexicanos'}" oninput="updateSocio(${i},'nacionalidad_padres',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Lugar de nacimiento</label>
+          <input class="form-input" value="${s.lugar_nacimiento||''}" oninput="updateSocio(${i},'lugar_nacimiento',this.value)" placeholder="Ciudad de México">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Fecha de nacimiento</label>
+          <input class="form-input" type="date" value="${s.fecha_nacimiento||''}" oninput="updateSocio(${i},'fecha_nacimiento',this.value);mostrarFechaLetra(${i})">
+          <p class="text-xs text-gray-400 mt-1" id="fecha-letra-${i}">${s.fecha_nacimiento?fechaALetra(s.fecha_nacimiento):''}</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Profesión / Ocupación</label>
+          <input class="form-input" value="${s.profesion||''}" oninput="updateSocio(${i},'profesion',this.value)" placeholder="empresario">
+        </div>
+      </div>
+      <div class="section-title">Domicilio</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Calle</label>
+          <input class="form-input" value="${s.domicilio_calle||''}" oninput="updateSocio(${i},'domicilio_calle',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Número exterior</label>
+          <input class="form-input" value="${s.domicilio_numero||''}" oninput="updateSocio(${i},'domicilio_numero',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Colonia</label>
+          <input class="form-input" value="${s.domicilio_colonia||''}" oninput="updateSocio(${i},'domicilio_colonia',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Código Postal</label>
+          <input class="form-input" value="${s.domicilio_cp||''}" oninput="updateSocio(${i},'domicilio_cp',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ciudad</label>
+          <input class="form-input" value="${s.domicilio_ciudad||''}" oninput="updateSocio(${i},'domicilio_ciudad',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <input class="form-input" value="${s.domicilio_estado||'Estado de México'}" oninput="updateSocio(${i},'domicilio_estado',this.value)">
+        </div>
+      </div>
+      <div class="section-title">Identificación y datos fiscales</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Tipo de identificación</label>
+          <select class="form-select" onchange="updateSocio(${i},'tipo_identificacion',this.value)">
+            <option value="Credencial para Votar" ${s.tipo_identificacion==='Credencial para Votar'?'selected':''}>Credencial para Votar</option>
+            <option value="Pasaporte" ${s.tipo_identificacion==='Pasaporte'?'selected':''}>Pasaporte</option>
+            <option value="Cédula Profesional" ${s.tipo_identificacion==='Cédula Profesional'?'selected':''}>Cédula Profesional</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Autoridad que expide</label>
+          <input class="form-input" value="${s.autoridad_identificacion||'el Instituto Nacional Electoral'}" oninput="updateSocio(${i},'autoridad_identificacion',this.value)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Clave de Elector (18 chars)</label>
+          <input class="form-input font-mono" maxlength="18" value="${s.clave_elector||''}" oninput="updateSocio(${i},'clave_elector',this.value.toUpperCase());this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Letra del apéndice</label>
+          <input class="form-input" maxlength="2" value="${s.anexo_identificacion||'D'}" oninput="updateSocio(${i},'anexo_identificacion',this.value.toUpperCase());this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">CURP (18 caracteres)</label>
+          <input class="form-input font-mono" maxlength="18" value="${s.curp||''}" oninput="updateSocio(${i},'curp',this.value.toUpperCase());this.value=this.value.toUpperCase()" placeholder="GAPM820521HMCRZN09">
+        </div>
+        <div class="form-group">
+          <label class="form-label required">RFC (12-13 caracteres)</label>
+          <input class="form-input font-mono" maxlength="13" value="${s.rfc||''}" oninput="updateSocio(${i},'rfc',this.value.toUpperCase());this.value=this.value.toUpperCase()" placeholder="GAPM820521U71">
+        </div>
+      </div>
+      <div class="section-title">Participación accionaria</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Número de acciones</label>
+          <input class="form-input" type="number" value="${s.numero_acciones||0}" oninput="updateSocio(${i},'numero_acciones',parseInt(this.value)||0);actualizarTotales()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Importe ($)</label>
+          <input class="form-input" type="number" value="${s.importe_acciones||0}" oninput="updateSocio(${i},'importe_acciones',parseFloat(this.value)||0);actualizarTotales()">
+        </div>
+      </div>
+      <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+        <button onclick="generarPreviewGenerales(${i})" class="btn btn-secondary text-sm">Ver texto de Generales</button>
+        <div id="generales-preview-${i}" class="mt-3 text-xs text-gray-700 leading-relaxed hidden p-3 bg-white rounded border border-blue-200 font-serif"></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function updateSocio(idx, field, value) {
+  FORM.socios[idx][field] = value;
+  if (field === 'nombre_completo') {
+    const el = document.getElementById('socio-nombre-display-'+idx);
+    if (el) el.textContent = value || 'Socio '+(idx+1);
+  }
+}
+
+function mostrarFechaLetra(idx) {
+  const s = FORM.socios[idx];
+  const el = document.getElementById('fecha-letra-'+idx);
+  if (el && s.fecha_nacimiento) el.textContent = fechaALetra(s.fecha_nacimiento);
+}
+
+function actualizarTotales() {
+  let totalAcc = 0, totalImp = 0;
+  FORM.socios.forEach(s => { totalAcc += (parseInt(s.numero_acciones)||0); totalImp += (parseFloat(s.importe_acciones)||0); });
+  const cap = parseFloat(document.getElementById('f-capital')?.value||'0');
+  const elAcc = document.getElementById('total-acciones');
+  const elImp = document.getElementById('total-importe');
+  const elCap = document.getElementById('capital-declarado');
+  if (elAcc) elAcc.textContent = totalAcc.toLocaleString();
+  if (elImp) elImp.textContent = '$' + totalImp.toLocaleString(undefined,{minimumFractionDigits:2});
+  if (elCap) elCap.textContent = '$' + cap.toLocaleString(undefined,{minimumFractionDigits:2});
+}
+
+function generarPreviewGenerales(idx) {
+  const s = FORM.socios[idx];
+  if (!s.nombre_completo || !s.fecha_nacimiento || !s.curp || !s.rfc) {
+    toast('Completa nombre, fecha de nacimiento, CURP y RFC antes de generar el preview', 'warning');
+    return;
+  }
+  const texto = generarTextoCuGenerales(s);
+  FORM.socios[idx].texto_generales = texto;
+  const el = document.getElementById('generales-preview-'+idx);
+  if (el) { el.textContent = texto; el.classList.remove('hidden'); }
+}
+
+// ============================================================
+// GUARDAR Y GENERAR INSTRUMENTO
+// ============================================================
+function recogerDatosFormulario() {
+  return {
+    numero_instrumento: document.getElementById('f-numero')?.value||'',
+    numero_volumen: document.getElementById('f-volumen')?.value||'',
+    fecha_instrumento: document.getElementById('f-fecha')?.value||'',
+    ciudad_otorgamiento: document.getElementById('f-ciudad')?.value||'',
+    plantilla_id: document.getElementById('f-plantilla')?.value||'',
+    status: document.getElementById('f-status')?.value||'BORRADOR',
+    nombre_empresa: document.getElementById('f-empresa')?.value||'',
+    objeto_social: document.getElementById('f-objeto')?.value||'',
+    duracion_sociedad: document.getElementById('f-duracion')?.value||'',
+    domicilio_social: document.getElementById('f-domicilio-social')?.value||'',
+    descripcion_capital: document.getElementById('f-desc-capital')?.value||'',
+    monto_capital: parseFloat(document.getElementById('f-capital')?.value||'0'),
+    numero_acciones: parseInt(document.getElementById('f-acciones')?.value||'0'),
+    valor_nominal: parseFloat(document.getElementById('f-valor-nominal')?.value||'0'),
+    monto_capital_letra: document.getElementById('f-capital-letra')?.value||'',
+    numero_acciones_letra: document.getElementById('f-acciones-letra')?.value||'',
+    nombre_administrador: document.getElementById('f-admin')?.value||'',
+    nombre_comisario: document.getElementById('f-comisario')?.value||'',
+    cargo_administrador: document.getElementById('f-cargo-admin')?.value||'',
+    duracion_cargo: document.getElementById('f-duracion-cargo')?.value||'',
+    facultades_administrador: document.getElementById('f-facultades')?.value||'',
+    socios: JSON.parse(JSON.stringify(FORM.socios)),
+  };
+}
+
+function guardarInstrumento(existingId) {
+  const datos = recogerDatosFormulario();
+  if (!datos.numero_instrumento) { toast('Ingresa el número de instrumento','error'); switchTab(0); return; }
+
+  const id = existingId || uid();
+  const instr = { id, ...datos, fechaCreacion: FORM.instrumento?.fechaCreacion || new Date().toISOString(), fechaActualizacion: new Date().toISOString(), docxBlob: FORM.instrumento?.docxBlob || null, creadoPor: APP.user.email };
+  DB.save('notaria_instrumentos', instr);
+  FORM.instrumento = instr;
+  toast('Instrumento guardado');
+  // Update page title and actions to reflect saved ID
+  document.getElementById('page-title').textContent = 'Editar Instrumento';
+  document.getElementById('page-actions').innerHTML = `
+    <div class="flex gap-2">
+      <button onclick="navigate('instrumentos')" class="btn btn-secondary">← Volver</button>
+      <button onclick="guardarInstrumento('${id}')" id="btn-save" class="btn btn-primary">Guardar</button>
+    </div>`;
+  return id;
+}
+
+async function generarDocumentoFinal(existingId) {
+  const savedId = guardarInstrumento(existingId);
+  const id = savedId || existingId;
+  const instr = DB.getOne('notaria_instrumentos', id);
+  if (!instr) { toast('Guarda el instrumento primero', 'error'); return; }
+
+  const plantilla = instr.plantilla_id ? DB.getOne('notaria_plantillas', instr.plantilla_id) : null;
+  if (!plantilla) { toast('Selecciona una plantilla .docx en la pestaña "Instrumento"', 'error'); switchTab(0); return; }
+
+  const btn = document.getElementById('btn-generar');
+  if (btn) { btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Generando...'; }
+
+  try {
+    if (!window.PizZip || !window.Docxtemplater) throw new Error('Librerías DOCX no cargadas. Verifica conexión a internet.');
+
+    const fechaParts = parsearFechaInstrumento(instr.fecha_instrumento || new Date().toISOString().slice(0,10));
+
+    // Build socios data
+    const sociosData = (instr.socios||[]).map((s,i) => {
+      const letrasAnexo = ['B','C','D','E','F','G','H','I','J'];
+      return {
+        ...s,
+        texto_generales: s.texto_generales || generarTextoCuGenerales(s),
+        fecha_nacimiento_letra: s.fecha_nacimiento ? fechaALetra(s.fecha_nacimiento) : '',
+        curp_letra: caracteresALetra(s.curp||''),
+        rfc_letra: caracteresALetra(s.rfc||''),
+        rfc_socio: s.rfc||'',
+        rfc_socio_escrito: caracteresALetra(s.rfc||''),
+        clave_elector_letra: caracteresALetra(s.clave_elector||''),
+        estado_civil: formatearEstadoCivil(s.estado_civil, s.genero),
+        numero_acciones_letra: numeroALetra(parseInt(s.numero_acciones)||0) + ' ' + ((parseInt(s.numero_acciones)||0)===1?'acción':'acciones'),
+        importe_acciones_letra: monedaALetra(parseFloat(s.importe_acciones)||0),
+        anexo_constancia: letrasAnexo[i]||'D',
+      };
+    });
+
+    const datos = {
+      numero_instrumento: instr.numero_instrumento||'',
+      numero_volumen: instr.numero_volumen||'',
+      dia: fechaParts.dia,
+      mes: fechaParts.mes,
+      anio: fechaParts.anio,
+      dia_letra: fechaParts.diaLetra,
+      mes_letra: fechaParts.mesLetra,
+      anio_letra: fechaParts.anioLetra,
+      fecha_completa: fechaParts.completa,
+      ciudad_otorgamiento: instr.ciudad_otorgamiento||'',
+      nombre_empresa: instr.nombre_empresa||'',
+      objeto_social: instr.objeto_social||'',
+      duracion_sociedad: instr.duracion_sociedad||'',
+      domicilio_social: instr.domicilio_social||'',
+      monto_capital: instr.monto_capital?.toLocaleString()||'',
+      monto_capital_letra: instr.monto_capital_letra || monedaALetra(instr.monto_capital||0),
+      numero_acciones: instr.numero_acciones?.toString()||'',
+      numero_acciones_letra: instr.numero_acciones_letra || numeroALetra(instr.numero_acciones||0)+' acciones',
+      valor_nominal: instr.valor_nominal?.toLocaleString()||'',
+      nombre_administrador: instr.nombre_administrador||'',
+      nombre_comisario: instr.nombre_comisario||'',
+      cargo_administrador: instr.cargo_administrador||'',
+      duracion_cargo: instr.duracion_cargo||'',
+      facultades_administrador: instr.facultades_administrador||'',
+      socios: sociosData,
+    };
+
+    const blob = await generarDocxBrowser(plantilla.contenido, datos);
+
+    // Store blob as base64
+    const reader = new FileReader();
+    reader.onload = e => {
+      instr.docxBlob = e.target.result;
+      instr.status = 'GENERADO';
+      instr.fechaGeneracion = new Date().toISOString();
+      DB.save('notaria_instrumentos', instr);
+      FORM.instrumento = instr;
+
+      // Download immediately
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'Instrumento_' + (instr.numero_instrumento||'documento').replace(/[^a-zA-Z0-9]/g,'_') + '.docx';
+      a.click();
+
+      const btnD = document.getElementById('btn-download');
+      if (btnD) btnD.classList.remove('hidden');
+      toast('Documento generado y descargado');
+    };
+    reader.readAsDataURL(blob);
+
+  } catch(e) {
+    console.error(e);
+    toast('Error al generar: ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.disabled=false; btn.innerHTML='<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg> Generar Documento .docx'; }
+  }
+}
+
+function descargarInstrumento(id) {
+  const instr = DB.getOne('notaria_instrumentos', id) || FORM.instrumento;
+  if (!instr?.docxBlob) { toast('Genera el documento primero', 'warning'); return; }
+  const a = document.createElement('a');
+  a.href = instr.docxBlob;
+  a.download = 'Instrumento_' + (instr.numero_instrumento||'documento').replace(/[^a-zA-Z0-9]/g,'_') + '.docx';
+  a.click();
+}
+
+// ============================================================
+// DOCX GENERATION (Browser)
+// ============================================================
+async function generarDocxBrowser(base64Content, datos) {
+  const b64 = base64Content.includes(',') ? base64Content.split(',')[1] : base64Content;
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+
+  const zip = new PizZip(bytes);
+  const doc = new Docxtemplater(zip, {
+    delimiters: { start: '{{', end: '}}' },
+    paragraphLoop: true,
+    linebreaks: true,
+    nullGetter: part => part.module ? '' : '{{' + part.value + '}}',
+  });
+
+  doc.render(datos);
+
+  return doc.getZip().generate({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    compression: 'DEFLATE',
+  });
+}
+
+// ============================================================
+// USUARIOS
+// ============================================================
+function renderUsuarios() {
+  if (APP.user.role !== 'ADMIN') { document.getElementById('content').innerHTML = '<p class="text-gray-500">Sin acceso</p>'; return; }
+  const usuarios = DB.get('notaria_users');
+
+  document.getElementById('page-actions').innerHTML = `<button onclick="showNuevoUsuario()" class="btn btn-primary">+ Nuevo Usuario</button>`;
+  document.getElementById('content').innerHTML = `
+    <div class="card">
+      <table class="w-full text-sm">
+        <thead><tr class="text-left text-xs text-gray-500 border-b border-gray-200 bg-gray-50">
+          <th class="px-5 py-3">Nombre</th><th class="px-5 py-3">Email</th><th class="px-5 py-3">Rol</th><th class="px-5 py-3">Estado</th><th class="px-5 py-3"></th>
+        </tr></thead>
+        <tbody>
+          ${usuarios.map(u=>`<tr class="table-row border-b border-gray-100">
+            <td class="px-5 py-3 font-medium">${u.name}</td>
+            <td class="px-5 py-3 text-gray-500">${u.email}</td>
+            <td class="px-5 py-3"><span class="badge ${u.role==='ADMIN'?'badge-purple':u.role==='CAPTURISTA'?'badge-blue':'badge-gray'}">${u.role}</span></td>
+            <td class="px-5 py-3"><span class="badge ${u.active?'badge-green':'badge-red'}">${u.active?'Activo':'Inactivo'}</span></td>
+            <td class="px-5 py-3 text-right flex gap-1 justify-end">
+              <button onclick="toggleUsuario('${u.id}')" class="btn btn-secondary text-xs py-1 px-3">${u.active?'Desactivar':'Activar'}</button>
+              ${u.id !== APP.user.id ? `<button onclick="showCambiarPassword('${u.id}')" class="btn btn-secondary text-xs py-1 px-3">Contraseña</button>` : ''}
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function toggleUsuario(id) {
+  const users = DB.get('notaria_users');
+  const u = users.find(u=>u.id===id);
+  if (!u) return;
+  if (u.id === APP.user.id) { toast('No puedes desactivar tu propia cuenta','warning'); return; }
+  u.active = !u.active;
+  DB.set('notaria_users', users);
+  toast('Usuario ' + (u.active?'activado':'desactivado'));
+  renderUsuarios();
+}
+
+function showNuevoUsuario() {
+  showModal(`<div class="modal p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold">Nuevo Usuario</h2>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label required">Nombre</label><input id="nu-name" class="form-input"></div>
+    <div class="form-group"><label class="form-label required">Email</label><input id="nu-email" class="form-input" type="email"></div>
+    <div class="form-group"><label class="form-label required">Contraseña</label><input id="nu-pass" class="form-input" type="password"></div>
+    <div class="form-group"><label class="form-label">Rol</label>
+      <select id="nu-role" class="form-select"><option>ADMIN</option><option selected>CAPTURISTA</option><option>CONSULTA</option></select>
+    </div>
+    <div class="flex gap-3 justify-end">
+      <button onclick="closeModal()" class="btn btn-secondary">Cancelar</button>
+      <button onclick="crearUsuario()" class="btn btn-primary">Crear</button>
+    </div>
+  </div>`);
+}
+
+async function crearUsuario() {
+  const name = document.getElementById('nu-name').value.trim();
+  const email = document.getElementById('nu-email').value.trim();
+  const pass = document.getElementById('nu-pass').value;
+  const role = document.getElementById('nu-role').value;
+  if (!name||!email||!pass) { toast('Completa todos los campos','error'); return; }
+  const users = DB.get('notaria_users');
+  if (users.find(u=>u.email===email)) { toast('El email ya existe','error'); return; }
+  const hash = await sha256(pass);
+  const user = { id:uid(), name, email, password:hash, role, active:true };
+  DB.save('notaria_users', user);
+  closeModal();
+  toast('Usuario creado');
+  renderUsuarios();
+}
+
+function showCambiarPassword(id) {
+  showModal(`<div class="modal p-6">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="text-lg font-semibold">Cambiar Contraseña</h2>
+      <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label required">Nueva contraseña</label><input id="cp-pass" class="form-input" type="password"></div>
+    <div class="flex gap-3 justify-end">
+      <button onclick="closeModal()" class="btn btn-secondary">Cancelar</button>
+      <button onclick="cambiarPassword('${id}')" class="btn btn-primary">Guardar</button>
+    </div>
+  </div>`);
+}
+
+async function cambiarPassword(id) {
+  const pass = document.getElementById('cp-pass').value;
+  if (!pass || pass.length < 6) { toast('La contraseña debe tener al menos 6 caracteres','error'); return; }
+  const users = DB.get('notaria_users');
+  const u = users.find(u=>u.id===id);
+  if (!u) return;
+  u.password = await sha256(pass);
+  DB.set('notaria_users', users);
+  closeModal();
+  toast('Contraseña actualizada');
+}
+
+// ============================================================
+// CONFIGURACIÓN
+// ============================================================
+function renderConfiguracion() {
+  document.getElementById('page-actions').innerHTML = '';
+  document.getElementById('content').innerHTML = `
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div class="card p-5">
+        <h2 class="font-semibold text-gray-900 mb-3">Notaría</h2>
+        <div class="space-y-2 text-sm"><p class="text-gray-500 text-xs">Nombre</p><p class="font-medium">Notaría Ciento Cuarenta y Nueve</p><p class="text-gray-500 text-xs mt-2">Notario</p><p class="font-medium">Lic. José Manuel Gómez del Campo Gurza</p><p class="text-gray-500 text-xs mt-2">Sede</p><p class="font-medium">Metepec, Estado de México</p></div>
+      </div>
+      <div class="card p-5">
+        <h2 class="font-semibold text-gray-900 mb-3">Almacenamiento</h2>
+        <div class="space-y-2 text-sm">
+          <p class="text-gray-500 text-xs">Motor</p><p class="font-medium">localStorage del navegador</p>
+          <p class="text-gray-500 text-xs mt-2">Plantillas guardadas</p><p class="font-medium">${DB.get('notaria_plantillas').length}</p>
+          <p class="text-gray-500 text-xs mt-2">Instrumentos guardados</p><p class="font-medium">${DB.get('notaria_instrumentos').length}</p>
+          <p class="text-gray-500 text-xs mt-2 text-amber-600">⚠ Los datos se guardan en este navegador. Usa el botón de exportar para respaldar.</p>
+        </div>
+      </div>
+      <div class="card p-5">
+        <h2 class="font-semibold text-gray-900 mb-3">Seguridad</h2>
+        <div class="space-y-1 text-sm text-gray-600">
+          <p>✓ Contraseñas con SHA-256</p>
+          <p>✓ Sesión almacenada en localStorage</p>
+          <p>✓ Control de acceso por roles</p>
+        </div>
+      </div>
+      <div class="card p-5">
+        <h2 class="font-semibold text-gray-900 mb-3">Motor DOCX</h2>
+        <div class="space-y-1 text-sm text-gray-600">
+          <p>✓ docxtemplater + pizzip (CDN)</p>
+          <p>✓ Generación 100% en el navegador</p>
+          <p>✓ Placeholders fragmentados automáticos</p>
+          <p>✓ Bloques repetibles {{#socios}}</p>
+          <p>✓ Preservación total de formato Word</p>
+        </div>
+      </div>
+    </div>
+    <div class="card p-5">
+      <h2 class="font-semibold text-gray-900 mb-3">Exportar / Importar datos</h2>
+      <div class="flex gap-3">
+        <button onclick="exportarDatos()" class="btn btn-secondary">⬇ Exportar todos los datos (.json)</button>
+        <button onclick="document.getElementById('import-file').click()" class="btn btn-secondary">⬆ Importar datos (.json)</button>
+        <input id="import-file" type="file" accept=".json" class="hidden" onchange="importarDatos(event)">
+      </div>
+      <p class="text-xs text-gray-400 mt-3">La exportación incluye plantillas (.docx en base64), instrumentos y usuarios. Úsala para respaldar o migrar entre navegadores.</p>
+    </div>
+    <div class="card p-5 mt-4">
+      <h2 class="font-semibold text-gray-900 mb-3">Placeholders para machotes</h2>
+      <div class="bg-gray-50 rounded-lg p-4 font-mono text-xs space-y-1">
+        <p><span class="text-blue-600">{{numero_instrumento}}</span> — Número del instrumento</p>
+        <p><span class="text-blue-600">{{numero_volumen}}</span> — Número de volumen</p>
+        <p><span class="text-blue-600">{{dia}} {{mes}} {{anio}}</span> — Fecha desglosada</p>
+        <p><span class="text-blue-600">{{fecha_completa}}</span> — Fecha en letra completa</p>
+        <p><span class="text-blue-600">{{nombre_empresa}}</span> — Nombre de la empresa</p>
+        <p><span class="text-blue-600">{{objeto_social}}</span> — Objeto social</p>
+        <p><span class="text-blue-600">{{duracion_sociedad}}</span> — Duración</p>
+        <p><span class="text-blue-600">{{monto_capital}}</span> / <span class="text-blue-600">{{monto_capital_letra}}</span></p>
+        <p><span class="text-blue-600">{{nombre_administrador}}</span> — Administrador único</p>
+        <p class="text-gray-400 mt-2">— Bloque de socios repetible —</p>
+        <p><span class="text-green-600">{{#socios}}</span></p>
+        <p class="pl-4"><span class="text-blue-600">{{nombre_completo}}</span> · <span class="text-blue-600">{{texto_generales}}</span></p>
+        <p class="pl-4"><span class="text-blue-600">{{numero_acciones}}</span> · <span class="text-blue-600">{{importe_acciones}}</span></p>
+        <p class="pl-4"><span class="text-blue-600">{{rfc}}</span> · <span class="text-blue-600">{{curp}}</span></p>
+        <p><span class="text-green-600">{{/socios}}</span></p>
+      </div>
+    </div>`;
+}
+
+function exportarDatos() {
+  const data = {
+    version: '1.0',
+    fecha: new Date().toISOString(),
+    notaria_users: DB.get('notaria_users'),
+    notaria_plantillas: DB.get('notaria_plantillas'),
+    notaria_instrumentos: DB.get('notaria_instrumentos'),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'notaria149_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  toast('Datos exportados');
+}
+
+function importarDatos(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!confirm('¿Importar datos? Esto reemplazará los datos actuales.')) return;
+      if (data.notaria_users) DB.set('notaria_users', data.notaria_users);
+      if (data.notaria_plantillas) DB.set('notaria_plantillas', data.notaria_plantillas);
+      if (data.notaria_instrumentos) DB.set('notaria_instrumentos', data.notaria_instrumentos);
+      toast('Datos importados correctamente');
+      renderConfiguracion();
+    } catch(err) { toast('Error al importar: archivo inválido', 'error'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  await seedUsuarios();
+  const session = DB.getObj('notaria_session');
+  if (session) {
+    const users = DB.get('notaria_users');
+    const user = users.find(u => u.id === session.id && u.active);
+    if (user) {
+      APP.user = user;
+      showApp();
+      navigate('dashboard');
+      return;
+    }
+  }
+  document.getElementById('page-login').classList.remove('hidden');
+}
+
+window.addEventListener('load', init);
 </script>
-
 </body>
 </html>
