@@ -1241,6 +1241,9 @@ function buildDataSA(instr){
     total_acciones:s2(instr.numero_acciones),
     total_acciones_letra:s2(instr.numero_acciones_letra)||numL(instr.numero_acciones||0)+' acciones',
     total_capital_letra:s2(instr.capital_minimo_letra)||monL(instr.capital_minimo||0),
+    ciudad_estado:s2(instr.ciudad_estado)||getConfig().ciudad_estado,
+    notario:s2(instr.notario)||getConfig().notario,
+    notaria:s2(instr.notaria)||getConfig().notaria,
     socios:sociosData,
   };
 }
@@ -1429,7 +1432,8 @@ function showDiagnostic(plantId){
     'nacionalidad','nac_padres','lugar_nacimiento','lugar_nac','genero',
     'tipo_identificacion','tipo_id','autoridad_identificacion','aut_id',
     'clave_elector','clave_elector_letra','apendice','dom_calle','dom_numero',
-    'dom_colonia','dom_cp','dom_ciudad','dom_estado','estado_civil_raw'];
+    'dom_colonia','dom_cp','dom_ciudad','dom_estado','estado_civil_raw',
+    'inciso','inciso_mayus','tratamiento','el_la','al_la','del_de_la'];
   const allKnown=new Set([...flatKeys,...flatSocioKeys]);
   const unknown=simpleVars.filter(v=>!allKnown.has(v));
 
