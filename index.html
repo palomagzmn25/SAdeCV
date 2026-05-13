@@ -1390,24 +1390,45 @@ async function buildDocx(instr,plant){
   try{zip=new PizZip(bytes);}
   catch(e){throw new Error('El archivo de plantilla no es un DOCX válido: '+e.message);}
 
-  // Docxtemplater v3: paragraphLoop para loops multi-párrafo
-  // NO usamos linebreaks:true ni nullGetter porque pueden causar problemas en algunas versiones
   let doc;
+  // Intentar primero con paragraphLoop:true; si falla, intentar sin él
+  let usedParagraphLoop=true;
   try{
     doc=new Docxtemplater(zip,{paragraphLoop:true});
-  }catch(e){throw new Error('Error al inicializar motor DOCX: '+e.message);}
+  }catch(e1){
+    // paragraphLoop falló — intentar sin él (template con loops en mismo párrafo)
+    try{
+      const zip2=new PizZip(bytes);
+      doc=new Docxtemplater(zip2,{paragraphLoop:false});
+      usedParagraphLoop=false;
+    }catch(e2){
+      // Ambos fallaron: extraer máximo detalle
+      const extractErrs=e=>{
+        const sub=(e.properties?.errors)||[];
+        if(sub.length)return sub.map(se=>{
+          const p=se.properties||{};
+          return `[${p.id||'error'}]${p.tag?' tag:{{'+p.tag+'}}':''} — ${p.explanation||se.message||''}`;
+        }).join('\n• ');
+        const p=e.properties||{};
+        return `[${p.id||e.name||'error'}] ${p.explanation||e.message}`;
+      };
+      const d1=extractErrs(e1);
+      throw new Error('La plantilla Word tiene errores de formato que impiden procesarla.\n\n• '+d1+
+        '\n\nSolución más común: en Word, selecciona cada {{marcador}} y vuelve a escribirlo completo para que Word no fragmente el texto internamente. Verifica también que cada {{#loop}} tenga su {{/loop}} en párrafos separados.');
+    }
+  }
 
   try{
     doc.render(datos);
   }catch(err){
-    // Extraer explicación detallada de los errores de docxtemplater
     const errs=(err.properties?.errors)||[];
     if(errs.length){
-      const tags=errs.map(e=>e.properties?.tag||e.properties?.id||'').filter(Boolean);
-      const expl=errs.map(e=>e.properties?.explanation||e.message||'').filter(Boolean);
-      const detail=expl.length?expl.join(' | '):('Tags con error: '+tags.join(', '));
-      throw new Error('Error en sustitución — '+detail+
-        (tags.length?' | Verifica que {{'+tags[0]+'}} exista en el formulario':''));
+      const details=errs.map(e=>{
+        const p=e.properties||{};
+        const tag=p.tag||p.id||'';
+        return (tag?`{{${tag}}}: `:'')+(p.explanation||e.message||'');
+      }).filter(Boolean).slice(0,6).join('\n• ');
+      throw new Error('Error al sustituir variables:\n• '+details);
     }
     throw new Error('Error al renderizar: '+(err.message||String(err)));
   }
@@ -1448,7 +1469,11 @@ function showDiagnostic(plantId){
     'dom_colonia','dom_cp','dom_ciudad','dom_estado','estado_civil_raw',
     'inciso','inciso_mayus','tratamiento','el_la','al_la','del_de_la'];
   const allKnown=new Set([...flatKeys,...flatSocioKeys]);
-  const unknown=simpleVars.filter(v=>!allKnown.has(v));
+  // Normaliza: quita cualquier char que no sea a-z A-Z 0-9 _ (invisibles, NBSP, saltos, etc.)
+  const normV=v=>v.replace(/[^a-zA-Z0-9_]/g,'');
+  const knownNorm=new Set([...flatKeys,...flatSocioKeys].map(normV));
+  const isKnown=v=>allKnown.has(v)||knownNorm.has(normV(v));
+  const unknown=simpleVars.filter(v=>!isKnown(v));
 
   modal(`<div class="md p-6" style="max-width:700px">
     <div class="flex items-center justify-between mb-4">
@@ -1467,7 +1492,7 @@ function showDiagnostic(plantId){
         <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Variables simples encontradas</p>
         <div style="max-height:280px;overflow-y:auto">
         ${simpleVars.length?simpleVars.map(v=>`<div class="flex items-center gap-2 py-1 border-b border-gray-100 text-sm">
-          <span class="${allKnown.has(v)?'text-green-600':'text-red-500'} text-base">${allKnown.has(v)?'✓':'✗'}</span>
+          <span class="${isKnown(v)?'text-green-600':'text-red-500'} text-base">${isKnown(v)?'✓':'✗'}</span>
           <code class="font-mono text-xs">${v}</code>
         </div>`).join(''):'<p class="text-gray-400 text-sm">Ninguna</p>'}
         </div>
