@@ -61,6 +61,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
 <script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.7/dist/pizzip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.53.0/build/docxtemplater.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
 if(typeof window.docxtemplater!=="undefined")window.Docxtemplater=window.docxtemplater;
 </script>
@@ -1139,21 +1140,33 @@ function getTemplateVars(b64){
     const bin=atob(raw);const bytes=new Uint8Array(bin.length);
     for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
     const zip=new PizZip(bytes);
-    // Concatenar todos los archivos XML relevantes
-    let xml='';
     const files=['word/document.xml','word/header1.xml','word/header2.xml','word/header3.xml',
                   'word/footer1.xml','word/footer2.xml','word/footer3.xml'];
-    files.forEach(f=>{if(zip.files[f])xml+=zip.files[f].asText();});
-    // Normalizar: juntar runs fragmentados para detectar {{var}} partidas
-    const normalized=xml.replace(/<\/w:t><\/w:r>[\s\S]*?<w:r[^>]*><w:t[^>]*>/g,'');
+    // Extraer texto párrafo a párrafo para manejar cualquier fragmentación de runs de Word
+    let allText='';
+    files.forEach(f=>{
+      if(!zip.files[f])return;
+      const xml=zip.files[f].asText();
+      // Iterar párrafos para evitar fusión entre párrafos distintos
+      const paraRe=/<w:p[ >][\s\S]*?<\/w:p>/g;
+      let pm;
+      while((pm=paraRe.exec(xml))!==null){
+        const tRe=/<w:t[^>]*>([\s\S]*?)<\/w:t>/g;
+        let tm,paraText='';
+        while((tm=tRe.exec(pm[0]))!==null)paraText+=tm[1];
+        allText+=paraText+'\n';
+      }
+    });
+    // Decodificar entidades XML básicas
+    allText=allText.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'");
+    // Eliminar caracteres invisibles que Word puede insertar (ZWNBSP, ZWSP, SHY, NBSP…)
+    const strip=s=>s.replace(/[­​‌‍﻿ ]/g,'').trim();
     const found=new Set();
     let m;
-    // Variables simples: {{var}}
     const re1=/\{\{([^{}#/][^{}]*?)\}\}/g;
-    while((m=re1.exec(normalized))!==null)found.add(m[1].trim());
-    // Loops: {{#var}} y {{/var}}
+    while((m=re1.exec(allText))!==null){const v=strip(m[1]);if(v)found.add(v);}
     const re2=/\{\{[#/]([^{}]+)\}\}/g;
-    while((m=re2.exec(normalized))!==null)found.add('#'+m[1].trim());
+    while((m=re2.exec(allText))!==null){const v=strip(m[1]);if(v)found.add('#'+v);}
     return[...found];
   }catch(e){return[];}
 }
@@ -1489,15 +1502,25 @@ function pgTranscripciones(){
   document.getElementById('content').innerHTML=`
     <div class="card p-6 mb-4">
       <h2 class="font-semibold text-gray-900 mb-3">Transcribir documento</h2>
-      <div class="al al-w text-sm mb-4">Requiere API key de Claude (Anthropic) en <button onclick="go('config')" class="text-blue-600 underline">Configuración</button>. Para PDF, el procesamiento puede tardar según el número de páginas.</div>
+      <div class="g2 gap-3 mb-4">
+        <div class="border border-blue-200 bg-blue-50 rounded-lg p-3">
+          <div class="text-sm font-semibold text-blue-800 mb-1">🤖 Con IA (Claude) — alta fidelidad</div>
+          <div class="text-xs text-blue-700">Ideal para manuscritos, sellos, tablas y escaneos de baja calidad. Requiere <button onclick="go('config')" class="underline font-medium">API key de Anthropic</button> configurada. Costo aprox. $0.03 USD/página.</div>
+        </div>
+        <div class="border border-green-200 bg-green-50 rounded-lg p-3">
+          <div class="text-sm font-semibold text-green-800 mb-1">📄 Sin IA (OCR gratuito)</div>
+          <div class="text-xs text-green-700">Ideal para documentos impresos o mecanografiados con texto claro. Corre en el navegador, sin costo ni API key. La primera vez descarga ~10 MB de datos del idioma.</div>
+        </div>
+      </div>
       <div class="dz" id="tdz" onclick="document.getElementById('tfile').click()" ondragover="event.preventDefault();this.classList.add('dov')" ondragleave="this.classList.remove('dov')" ondrop="htdrop(event)">
         <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
         <p class="text-gray-500 text-sm">Arrastra o <span class="text-blue-600">selecciona</span> un archivo PDF, JPG o PNG</p>
         <p id="tname" class="text-xs text-blue-700 mt-1 font-medium"></p>
       </div>
       <input id="tfile" type="file" accept=".pdf,.jpg,.jpeg,.png" class="hidden" onchange="htfile(event)">
-      <div class="flex gap-3 mt-4">
-        <button onclick="iniciarTranscripcion()" class="btn bp" id="tbtn">Transcribir con Claude</button>
+      <div class="flex flex-wrap gap-3 mt-4">
+        <button onclick="iniciarTranscripcion()" class="btn bp" id="tbtn">🤖 Transcribir con Claude</button>
+        <button onclick="iniciarTranscripcionOCR()" class="btn" style="background:#16a34a;color:#fff;border-color:#16a34a" id="tbtn2">📄 OCR gratuito</button>
         <button onclick="clearTranscripcion()" class="btn bs">Limpiar</button>
       </div>
     </div>
@@ -1541,7 +1564,7 @@ function setTfile(f){
   document.getElementById('tres').classList.add('hidden');
   document.getElementById('ttxt').value='';
 }
-function clearTranscripcion(){_tFile=null;_tResult='';document.getElementById('tname').textContent='';document.getElementById('tres').classList.add('hidden');document.getElementById('tfile').value='';}
+function clearTranscripcion(){_tFile=null;_tResult='';document.getElementById('tname').textContent='';document.getElementById('tres').classList.add('hidden');document.getElementById('tfile').value='';document.getElementById('ttxt').value='';}
 
 async function iniciarTranscripcion(){
   if(!_tFile){toast('Selecciona un archivo primero','warn');return;}
@@ -1568,7 +1591,54 @@ async function iniciarTranscripcion(){
     document.getElementById('tres').classList.remove('hidden');
     toast('Transcripción completada ✓');
   }catch(e){errModal('Error en transcripción','<b>Detalle:</b> '+e.message+'<br><br>Verifica que tu API key sea correcta y que tengas saldo disponible.');}
-  finally{btn.disabled=false;btn.innerHTML='Transcribir con Claude';}
+  finally{btn.disabled=false;btn.innerHTML='🤖 Transcribir con Claude';}
+}
+
+async function iniciarTranscripcionOCR(){
+  if(!_tFile){toast('Selecciona un archivo primero','warn');return;}
+  if(typeof Tesseract==='undefined'){errModal('Tesseract no disponible','Recarga la página e intenta de nuevo.');return;}
+  const btn=document.getElementById('tbtn2');
+  const btn1=document.getElementById('tbtn');
+  btn.disabled=true;btn1.disabled=true;
+  let worker=null;
+  try{
+    let paginas=[];
+    if(_tFile.type==='application/pdf'){
+      btn.innerHTML='<span class="sp"></span> Convirtiendo PDF...';
+      toast('Convirtiendo PDF a imágenes...','info');
+      paginas=await pdfAImagenes(_tFile);
+    }else{
+      paginas=[await archivoABase64(_tFile)];
+    }
+    btn.innerHTML='<span class="sp"></span> Cargando idioma…';
+    toast('Cargando motor OCR — primera vez: descarga ~10 MB del idioma español','info');
+    worker=await Tesseract.createWorker('spa',1,{
+      workerPath:'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
+      langPath:'https://tessdata.projectnaptha.com/4.0.0',
+      logger:m=>{
+        const b=document.getElementById('tbtn2');if(!b)return;
+        if(m.status==='loading language traineddata')b.innerHTML='<span class="sp"></span> Descargando idioma…';
+        else if(m.status==='recognizing text')b.innerHTML=`<span class="sp"></span> OCR: ${Math.round((m.progress||0)*100)}%`;
+        else if(m.status==='loading tesseract core')b.innerHTML='<span class="sp"></span> Iniciando motor…';
+      }
+    });
+    let texto='';
+    for(let i=0;i<paginas.length;i++){
+      toast(`OCR página ${i+1} de ${paginas.length}...`,'info');
+      const dataUrl=`data:${paginas[i].mimeType};base64,${paginas[i].data}`;
+      const {data:{text}}=await worker.recognize(dataUrl);
+      texto+=`\n══ PÁGINA ${i+1} ══\n\n${text.trim()}\n`;
+    }
+    await worker.terminate();worker=null;
+    _tResult=texto.trim();
+    document.getElementById('ttxt').value=_tResult;
+    document.getElementById('tres').classList.remove('hidden');
+    toast('OCR completado ✓');
+  }catch(e){
+    if(worker){try{await worker.terminate();}catch(_){}}
+    errModal('Error en OCR','<b>Detalle:</b> '+e.message+'<br><br>Asegúrate de tener conexión a internet para descargar el idioma la primera vez.');
+  }
+  finally{btn.disabled=false;btn1.disabled=false;btn.innerHTML='📄 OCR gratuito';}
 }
 
 async function pdfAImagenes(file){
