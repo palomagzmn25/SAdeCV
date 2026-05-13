@@ -58,6 +58,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
 .hint{font-size:11px;color:#6b7280;margin-top:3px;}
 .hint.warn{color:#d97706;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/pizzip@3.1.7/dist/pizzip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.53.0/build/docxtemplater.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script>
+if(typeof window.docxtemplater!=="undefined")window.Docxtemplater=window.docxtemplater;
+</script>
 </head>
 <body class="bg-gray-50 min-h-screen">
 <div id="toast"></div>
@@ -100,6 +106,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
       <a onclick="go('dashboard')" class="sl" data-r="dashboard"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Dashboard</a>
       <a onclick="go('instrumentos')" class="sl" data-r="instrumentos"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Instrumentos</a>
       <a onclick="go('plantillas')" class="sl" data-r="plantillas"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>Plantillas</a>
+      <a onclick="go('transcripciones')" class="sl" data-r="transcripciones"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>Transcripciones</a>
+      <a onclick="go('config')" class="sl" data-r="config"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Configuración</a>
       <a onclick="go('usuarios')" class="sl adm hidden" data-r="usuarios"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>Usuarios</a>
     </nav>
     <div class="p-3 border-t border-gray-200">
@@ -121,28 +129,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
 <div id="mcont"></div>
 
 <script>
-// ─── CONSTANTES DE VERSIÓN CDN ───────────────────────────────────────────────
-const CDN_PIZZIP = 'https://cdn.jsdelivr.net/npm/pizzip@3.1.7/dist/pizzip.js';
-const CDN_DOCX   = 'https://cdn.jsdelivr.net/npm/docxtemplater@3.53.0/build/docxtemplater.js';
-const CDN_PIZZIP2= 'https://unpkg.com/pizzip@3.1.7/dist/pizzip.js';
-const CDN_DOCX2  = 'https://unpkg.com/docxtemplater@3.53.0/build/docxtemplater.js';
-
-// ─── CARGAR LIBRERÍAS DINÁMICAMENTE CON FALLBACK ─────────────────────────────
-function loadScript(src){
-  return new Promise((ok,fail)=>{
-    if(document.querySelector(`script[src="${src}"]`)){ok();return;}
-    const s=document.createElement('script');s.src=src;
-    s.onload=ok;s.onerror=()=>fail(new Error('No cargó: '+src));
-    document.head.appendChild(s);
-  });
-}
-async function ensureLibs(){
-  if(typeof PizZip!=='undefined'&&typeof Docxtemplater!=='undefined')return true;
-  try{await loadScript(CDN_PIZZIP);await loadScript(CDN_DOCX);}catch(e){}
-  if(typeof PizZip!=='undefined'&&typeof Docxtemplater!=='undefined')return true;
-  try{await loadScript(CDN_PIZZIP2);await loadScript(CDN_DOCX2);}catch(e){}
-  return typeof PizZip!=='undefined'&&typeof Docxtemplater!=='undefined';
-}
+// ─── LIBRERÍAS EMBEBIDAS INLINE (PizZip + Docxtemplater) ────────────────────
+function ensureLibs(){return typeof PizZip!=='undefined'&&typeof Docxtemplater!=='undefined';}
 
 // ─── UTILIDADES NUMÉRICAS / FECHA EN LETRA ───────────────────────────────────
 const UN=['','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve'];
@@ -179,6 +167,9 @@ const DB={
   del:(k,id)=>DB.set(k,DB.get(k).filter(i=>i.id!==id))
 };
 function uid(){return crypto.randomUUID?crypto.randomUUID():'xxxx-xxxx-4xxx-yxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16);});}
+function getConfig(){return Object.assign({notario:'JOSÉ MANUEL GÓMEZ DEL CAMPO GURZA',notaria:'NOTARÍA CIENTO CUARENTA Y NUEVE DEL ESTADO DE MÉXICO',ciudad_estado:'Metepec, Estado de México',api_key:''},DB.obj('n_config')||{});}
+function setConfig(data){DB.set('n_config',data);}
+function escXml(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // ─── AUTH ─────────────────────────────────────────────────────────────────────
 async function sha(str){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
@@ -208,6 +199,22 @@ function doLogout(){localStorage.removeItem('n_sess');APP.u=null;document.getEle
 
 // ─── APP CORE ─────────────────────────────────────────────────────────────────
 const APP={u:null,params:{}};
+
+// ─── REGISTRO DE TIPOS DE INSTRUMENTO ────────────────────────────────────────
+// Para agregar un nuevo tipo: añadir entrada aquí con su buildData y validate
+const TIPOS_INSTRUMENTO={
+  SA:{label:'Sociedad Anónima de Capital Variable',abrev:'S.A. de C.V.',color:'bg-b',tabs:['1. Instrumento','2. Sociedad','3. Capital','4. Socios','5. Administración']},
+  PODER:{label:'Poder Notarial',abrev:'Poder',color:'bg-p',tabs:['1. Instrumento','2. Otorgantes','3. Apoderado','4. Facultades']},
+  COMPRAVENTA:{label:'Compraventa',abrev:'Compraventa',color:'bg-g',tabs:['1. Instrumento','2. Vendedor','3. Comprador','4. Inmueble']},
+  OTRO:{label:'Otro (campos libres)',abrev:'Otro',color:'bg-y',tabs:['1. Instrumento','2. Campos']},
+  SAS:{label:'Sociedad por Acciones Simplificada',abrev:'S.A.S.',color:'bg-g',tabs:['1. Instrumento'],_stub:true},
+  AC:{label:'Asociación Civil',abrev:'A.C.',color:'bg-y',tabs:['1. Instrumento'],_stub:true},
+  TESTAMENTO:{label:'Testamento',abrev:'Test.',color:'bg-r',tabs:['1. Instrumento'],_stub:true},
+  SRL:{label:'Sociedad de Responsabilidad Limitada',abrev:'S.R.L.',color:'bg-r',tabs:['1. Instrumento'],_stub:true},
+};
+function tipoLabel(t){return TIPOS_INSTRUMENTO[t]?.label||t||'—';}
+function tipoAbrev(t){return TIPOS_INSTRUMENTO[t]?.abrev||t||'—';}
+function tipoColor(t){return TIPOS_INSTRUMENTO[t]?.color||'bg-r';}
 function showApp(){
   document.getElementById('pg-login').classList.add('hidden');
   document.getElementById('pg-app').classList.remove('hidden');
@@ -220,11 +227,18 @@ function showApp(){
 function go(route,params={}){
   APP.params=params;
   document.querySelectorAll('.sl[data-r]').forEach(el=>el.classList.toggle('active',el.dataset.r===route.split('/')[0]));
-  const T={dashboard:'Dashboard',instrumentos:'Instrumentos',plantillas:'Plantillas',usuarios:'Usuarios','form-instr':'Instrumento'};
+  const T={dashboard:'Dashboard',instrumentos:'Instrumentos',plantillas:'Plantillas',usuarios:'Usuarios','form-instr':'Instrumento',transcripciones:'Transcripciones',config:'Configuración'};
   document.getElementById('ptitle').textContent=T[route.split('/')[0]]||route;
   document.getElementById('pacts').innerHTML='';
   document.getElementById('content').innerHTML='<div class="flex items-center justify-center h-32 text-gray-400 text-sm">Cargando...</div>';
-  ({dashboard:pgDashboard,instrumentos:pgInstrumentos,'form-instr':()=>pgFormInstr(params.id),plantillas:pgPlantillas,usuarios:pgUsuarios}[route.split('/')[0]]||(() =>{}))();
+  ({dashboard:pgDashboard,instrumentos:pgInstrumentos,'form-instr':()=>pgFormInstr(params.id),plantillas:pgPlantillas,usuarios:pgUsuarios,transcripciones:pgTranscripciones,config:pgConfig}[route.split('/')[0]]||(() =>{}))();
+}
+function instrDisplayName(i){
+  switch(i.tipo_instrumento){
+    case 'PODER': return (i.otorgantes?.[0]?.nombre_completo||'Sin otorgante')+' — '+(i.acto||'Poder');
+    case 'COMPRAVENTA': return [i.vendedor?.nombre_completo,i.comprador?.nombre_completo].filter(Boolean).join(' / ')||'—';
+    default: return i.nombre_empresa||'—';
+  }
 }
 
 // ─── TOAST / MODAL ────────────────────────────────────────────────────────────
@@ -240,11 +254,12 @@ function cmodal(){document.getElementById('mcont').innerHTML='';}
 
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
 function pgDashboard(){
-  const instr=DB.get('n_instr'),plant=DB.get('n_plant'),rec=instr.slice(-6).reverse();
+  const instr=DB.get('n_instr'),plant=DB.get('n_plant'),trans=DB.get('n_transcripciones'),rec=instr.slice(-6).reverse();
   document.getElementById('content').innerHTML=`
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       ${scard('Instrumentos',instr.length,'#2563eb','M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z')}
       ${scard('Plantillas',plant.length,'#059669','M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z')}
+      ${scard('Transcripciones',trans.length,'#0e7490','M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z')}
       ${scard('Con .docx',instr.filter(i=>i.docx).length,'#7c3aed','M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2')}
     </div>
     <div class="card p-5">
@@ -255,7 +270,7 @@ function pgDashboard(){
       </tr></thead><tbody>
       ${rec.map(i=>`<tr class="tr border-b border-gray-100 cursor-pointer" onclick="go('form-instr',{id:'${i.id}'})">
         <td class="py-2.5 pr-3 font-mono text-blue-700 font-medium">${i.numero_instrumento||'—'}</td>
-        <td class="py-2.5 pr-3 font-medium">${(i.nombre_empresa||'—').slice(0,38)}</td>
+        <td class="py-2.5 pr-3 font-medium">${(i.nombre_empresa||'—').slice(0,38)}<span class="ml-2 text-xs text-gray-400">${tipoAbrev(i.tipo_instrumento||'SA')}</span></td>
         <td class="py-2.5 pr-3 text-gray-500">${i.fecha_instrumento||'—'}</td>
         <td class="py-2.5">${i.docx?'<span class="badge bg-g">✓ Listo</span>':'<span class="badge bg-r">Borrador</span>'}</td>
       </tr>`).join('')}
@@ -278,7 +293,7 @@ function pgPlantillas(){
       <td class="px-4 py-3 text-gray-500">${(p.vars||[]).length} vars</td>
       <td class="px-4 py-3 text-gray-500">${(p.fecha||'').slice(0,10)}</td>
       <td class="px-4 py-3"><div class="flex gap-2 justify-end">
-        <button onclick="dlPlant('${p.id}')" class="btn bc text-xs py-1 px-3">⬇ Descargar</button>
+        <button onclick="showDiagnostic('${p.id}')" class="btn bw text-xs py-1 px-3">🔍 Diagnóstico</button><button onclick="dlPlant('${p.id}')" class="btn bc text-xs py-1 px-3">⬇ Descargar</button>
         ${can?`<button onclick="delPlant('${p.id}')" class="btn bd text-xs py-1 px-3">Eliminar</button>`:''}
       </div></td>
     </tr>`).join('')}
@@ -324,8 +339,7 @@ async function saveUpload(){
   if(!_f){toast('Selecciona un .docx','err');return;}
   const btn=document.getElementById('bsave');btn.disabled=true;btn.innerHTML='<span class="sp"></span> Guardando...';
   try{
-    const ok=await ensureLibs();
-    const vars=ok?detectVars(_f.data):[];
+    const vars=detectVars(_f.data);
     DB.save('n_plant',{id:uid(),nombre,tipo:document.getElementById('pt').value,vars,fecha:new Date().toISOString(),data:_f.data,fname:_f.name});
     _f=null;cmodal();toast('Plantilla guardada');pgPlantillas();
   }catch(e){toast('Error: '+e.message,'err');}
@@ -337,174 +351,364 @@ function delPlant(id){if(!confirm('¿Eliminar esta plantilla?'))return;DB.del('n
 // ─── INSTRUMENTOS — LISTA ─────────────────────────────────────────────────────
 function pgInstrumentos(){
   const can=APP.u.role!=='CONSULTA';
-  document.getElementById('pacts').innerHTML=can?`<button onclick="go('form-instr')" class="btn bp">+ Nuevo Instrumento</button>`:'';
+  document.getElementById('pacts').innerHTML=can?`<button onclick="go('form-instr')" class="btn bp">+ Nuevo Instrumento</button><button onclick="testMotor()" class="btn bs ml-2">🧪 Probar motor</button><button onclick="exportDB()" class="btn bs ml-1">⬇ Exportar DB</button>`:`<button onclick="exportDB()" class="btn bs">⬇ Exportar DB</button>`;
   document.getElementById('content').innerHTML=`
-    <div class="card mb-4 p-4 flex gap-3">
-      <input id="qs" class="fi flex-1" placeholder="Buscar por número o empresa..." oninput="filtI()">
+    <div class="card mb-4 p-4 flex gap-3 flex-wrap">
+      <input id="qs" class="fi flex-1 min-w-48" placeholder="Buscar por número, empresa u otorgante..." oninput="filtI()">
+      <select id="qf" class="fsl w-44" onchange="filtI()"><option value="">— Todos los tipos —</option>${Object.entries(TIPOS_INSTRUMENTO).filter(([,v])=>!v._stub).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('')}</select>
     </div>
     <div class="card"><div id="itbl">${tblI(DB.get('n_instr'),can)}</div></div>`;
+}
+
+async function testMotor(){
+  if(!ensureLibs()){errModal('Librerías no cargadas','PizZip o Docxtemplater no están disponibles. Recarga la página.');return;}
+  // Crear un DOCX mínimo desde cero con PizZip para probar el motor
+  try{
+    // DOCX mínimo hardcodeado en base64 con {{nombre}} y {{fecha}}
+    const minidocx='UEsDBBQABgAIAAAAIQDfpNJsWgEAACAFAAATAAgCW0NvbnRlbnRfVHlwZXNdLnhtbCCiBAIooAAC'+
+      'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'+
+      'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'+
+      'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+    // En lugar de un DOCX mínimo, creamos uno dinámicamente
+    toast('Construyendo DOCX de prueba...','info');
+    // Crear estructura mínima de DOCX
+    const zip=new PizZip();
+    const ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+      '<Default Extension="xml" ContentType="application/xml"/>'+
+      '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+
+      '</Types>';
+    const rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'+
+      '</Relationships>';
+    const wordrels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"></Relationships>';
+    const doc='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'+
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'+
+      '<w:body><w:p><w:r><w:t>Prueba: {{nombre}}</w:t></w:r></w:p>'+
+      '<w:p><w:r><w:t>Fecha: {{fecha}}</w:t></w:r></w:p>'+
+      '<w:p><w:r><w:t>Motor funcionando correctamente.</w:t></w:r></w:p>'+
+      '<w:sectPr/></w:body></w:document>';
+    zip.file('[Content_Types].xml',ct);
+    zip.file('_rels/.rels',rels);
+    zip.file('word/_rels/document.xml.rels',wordrels);
+    zip.file('word/document.xml',doc);
+    const docx=new Docxtemplater(zip,{paragraphLoop:true});
+    docx.render({nombre:'JUAN PÉREZ GARCÍA',fecha:'once de mayo de dos mil veinticinco'});
+    const blob=docx.getZip().generate({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',compression:'DEFLATE'});
+    dlBlob(blob,'PRUEBA_MOTOR.docx');
+    toast('✓ Motor OK — revisa el archivo PRUEBA_MOTOR.docx descargado');
+  }catch(e){
+    console.error(e);
+    errModal('Error en motor DOCX','El motor falló en la prueba básica.<br><br><b>Error:</b> '+e.message);
+  }
 }
 function tblI(list,can){
   if(can===undefined)can=APP.u.role!=='CONSULTA';
   if(!list.length)return`<div class="p-10 text-center text-gray-400">${can?`<p class="mb-3">Sin instrumentos</p><button onclick="go('form-instr')" class="btn bp">Crear instrumento</button>`:'Sin instrumentos'}</div>`;
   return`<table class="w-full text-sm"><thead><tr class="text-left text-xs text-gray-500 border-b border-gray-200 bg-gray-50">
-    <th class="px-4 py-3">Núm. Instrumento</th><th class="px-4 py-3">Empresa</th><th class="px-4 py-3">Fecha</th><th class="px-4 py-3">Socios</th><th class="px-4 py-3">.docx</th><th class="px-4 py-3"></th>
+    <th class="px-4 py-3">Núm. Instrumento</th><th class="px-4 py-3">Empresa</th><th class="px-4 py-3">Tipo</th><th class="px-4 py-3">Fecha</th><th class="px-4 py-3">Socios</th><th class="px-4 py-3"></th>
   </tr></thead><tbody>
   ${list.map(i=>`<tr class="tr border-b border-gray-100">
     <td class="px-4 py-2.5 font-mono text-blue-700 font-medium">${i.numero_instrumento||'—'}</td>
-    <td class="px-4 py-2.5 font-medium">${(i.nombre_empresa||'—').slice(0,32)}</td>
+    <td class="px-4 py-2.5 font-medium">${instrDisplayName(i).slice(0,38)}</td>
+    <td class="px-4 py-2.5"><span class="badge ${tipoColor(i.tipo_instrumento)}">${tipoAbrev(i.tipo_instrumento||'SA')}</span></td>
     <td class="px-4 py-2.5 text-gray-500 whitespace-nowrap">${i.fecha_instrumento||'—'}</td>
     <td class="px-4 py-2.5 text-gray-500">${(i.socios||[]).length}</td>
-    <td class="px-4 py-2.5">${i.docx?'<span class="badge bg-g">✓ Listo</span>':'<span class="badge bg-r">Borrador</span>'}</td>
     <td class="px-4 py-2.5"><div class="flex gap-1 justify-end flex-wrap">
       ${can?`<button onclick="go('form-instr',{id:'${i.id}'})" class="btn bs text-xs py-1 px-3">Editar</button>`:`<button onclick="go('form-instr',{id:'${i.id}'})" class="btn bs text-xs py-1 px-3">Ver</button>`}
-      <button onclick="genDlI('${i.id}',this)" class="btn ${i.docx?'bc':'bw'} text-xs py-1 px-3">${i.docx?'⬇ .docx':'⚙ Generar'}</button>
+      <button onclick="genDlI('${i.id}',this)" class="btn bw text-xs py-1 px-3">⚙ Generar</button>
       ${can?`<button onclick="delI('${i.id}')" class="btn bd text-xs py-1 px-2">✕</button>`:''}
     </div></td>
   </tr>`).join('')}
   </tbody></table>`;
 }
-function filtI(){const q=(document.getElementById('qs').value||'').toLowerCase();let l=DB.get('n_instr');if(q)l=l.filter(i=>(i.numero_instrumento||'').toLowerCase().includes(q)||(i.nombre_empresa||'').toLowerCase().includes(q));document.getElementById('itbl').innerHTML=tblI(l);}
+function filtI(){
+  const q=(document.getElementById('qs').value||'').toLowerCase();
+  const tf=(document.getElementById('qf')?.value||'');
+  let l=DB.get('n_instr');
+  if(tf)l=l.filter(i=>(i.tipo_instrumento||'SA')===tf);
+  if(q)l=l.filter(i=>(i.numero_instrumento||'').toLowerCase().includes(q)||instrDisplayName(i).toLowerCase().includes(q));
+  document.getElementById('itbl').innerHTML=tblI(l);
+}
 function delI(id){if(!confirm('¿Eliminar este instrumento?'))return;DB.del('n_instr',id);toast('Eliminado');pgInstrumentos();}
 
 async function genDlI(id,btn){
-  // Generar y/o descargar desde la lista
   const i=DB.one('n_instr',id);if(!i)return;
-  if(i.docx){dlDocx(i);return;}
-  // Si no tiene plantilla asignada, avisar
-  if(!i.plantilla_id){toast('Este instrumento no tiene plantilla asignada. Ábrelo para asignar una.','warn');go('form-instr',{id});return;}
-  const orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="sp"></span>';
+
+  // Verificar prereqs con mensajes claros
+  if(!i.plantilla_id){
+    errModal('Sin plantilla asignada','Este instrumento no tiene una plantilla .docx asignada.<br><br>Ábrelo con <b>Editar</b>, ve a la pestaña <b>1. Instrumento</b> y selecciona una plantilla del menú.');
+    return;
+  }
+  const plant=DB.one('n_plant',i.plantilla_id);
+  if(!plant){
+    errModal('Plantilla no encontrada','La plantilla asignada ya no existe en este navegador.<br><br>Ve a <b>Plantillas</b> y vuelve a subir el archivo .docx.');
+    return;
+  }
+  if(!ensureLibs()){
+    errModal('Librerías no disponibles','Las librerías de generación DOCX no están cargadas.<br><br>Recarga la página completa (F5) e intenta de nuevo.');
+    return;
+  }
+
+  const orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="sp"></span> Generando...';
   try{
-    const blob=await buildDocx(i);
-    guardarDocx(id,blob);
-    dlDocx(DB.one('n_instr',id));
-    // Refresh row
+    toast('Procesando plantilla...','info');
+    const blob=await buildDocx(i,plant);
+    const nombre='Instrumento_'+(i.numero_instrumento||'doc').replace(/[^a-zA-Z0-9]/g,'_')+'.docx';
+    dlBlob(blob,nombre);
+    await guardarDocx(id,blob);
     const itbl=document.getElementById('itbl');if(itbl)itbl.innerHTML=tblI(DB.get('n_instr'));
-    toast('Documento generado y descargado');
-  }catch(e){toast('Error: '+e.message,'err');}
+    toast('¡Documento generado y descargado! ✓');
+  }catch(e){
+    console.error('Error generando DOCX:',e);
+    errModal('Error al generar el documento',
+      '<b>Detalle:</b> '+(e.message||String(e))+
+      '<br><br>Posibles causas:<ul style="margin:8px 0 0 16px;list-style:disc">'+
+      '<li>La plantilla .docx está dañada — vuelve a subirla</li>'+
+      '<li>Un placeholder en la plantilla tiene formato inválido</li>'+
+      '<li>Usa el botón <b>🔍 Diagnóstico</b> en Plantillas para verificar las variables</li></ul>');
+  }
   finally{btn.disabled=false;btn.innerHTML=orig;}
+}
+
+function errModal(titulo,html){
+  modal(`<div class="md p-6" style="max-width:520px">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <h2 class="text-lg font-semibold text-gray-900">${titulo}</h2>
+    </div>
+    <div class="text-sm text-gray-700 leading-relaxed">${html}</div>
+    <div class="flex justify-end mt-5">
+      <button onclick="cmodal()" class="btn bp">Entendido</button>
+    </div>
+  </div>`);
 }
 function dlDocx(i){if(!i?.docx)return;const a=document.createElement('a');a.href=i.docx;a.download='Instrumento_'+(i.numero_instrumento||'doc').replace(/[^a-zA-Z0-9]/g,'_')+'.docx';a.click();}
 function guardarDocx(id,blob){
-  const r=new FileReader();
-  r.onload=e=>{const i=DB.one('n_instr',id);if(i){i.docx=e.target.result;i.fechaGen=new Date().toISOString();DB.save('n_instr',i);}};
-  r.readAsDataURL(blob);
+  return new Promise(resolve=>{
+    const r=new FileReader();
+    r.onload=e=>{const i=DB.one('n_instr',id);if(i){i.docx=e.target.result;i.fechaGen=new Date().toISOString();DB.save('n_instr',i);}resolve();};
+    r.readAsDataURL(blob);
+  });
+}
+function dlBlob(blob,nombre){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=nombre;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
 
 // ─── INSTRUMENTO — FORMULARIO ─────────────────────────────────────────────────
-let F={socios:[],tab:0,instr:null};
+let F={tipo:'SA',socios:[],otorgantes:[],apoderado:{},vendedor:{},comprador:{},inmueble:{},camposDef:[],camposVal:{},tab:0,instr:null};
+function newPersona(i){return{_id:uid(),nombre_completo:'',genero:'masculino',nacionalidad:'mexicana',nac_padres:'mexicanos',lugar_nac:'',fecha_nac:'',estado_civil:'soltero',profesion:'',dom_calle:'',dom_numero:'',dom_colonia:'',dom_cp:'',dom_ciudad:'',dom_estado:'Estado de México',tipo_id:'Credencial para Votar',aut_id:'el Instituto Nacional Electoral',clave_elector:'',apendice:APD[i]||'D',curp:'',rfc:''};}
+function initF(tipo,instr){
+  const cp=x=>x?JSON.parse(JSON.stringify(x)):null;
+  switch(tipo){
+    case 'PODER': return{tipo,tab:0,instr:cp(instr),otorgantes:cp(instr?.otorgantes)||[newPersona(0)],apoderado:cp(instr?.apoderado)||newPersona(0)};
+    case 'COMPRAVENTA': return{tipo,tab:0,instr:cp(instr),vendedor:cp(instr?.vendedor)||newPersona(0),comprador:cp(instr?.comprador)||newPersona(0),inmueble:cp(instr?.inmueble)||{}};
+    case 'OTRO': return{tipo,tab:0,instr:cp(instr),camposDef:cp(instr?.camposDef)||[],camposVal:cp(instr?.camposVal)||{}};
+    default: return{tipo:'SA',tab:0,instr:cp(instr),socios:cp(instr?.socios)||[newSocio(0)]};
+  }
+}
 
 function pgFormInstr(id){
   const can=APP.u.role!=='CONSULTA';
   const instr=id?DB.one('n_instr',id):null;
-  F={socios:instr?.socios?JSON.parse(JSON.stringify(instr.socios)):[newSocio(0)],tab:0,instr:instr?JSON.parse(JSON.stringify(instr)):null};
-
+  const tipoActual=instr?.tipo_instrumento||'SA';
+  F=initF(tipoActual,instr);
+  const tipoDef=TIPOS_INSTRUMENTO[tipoActual];
+  const tabs=tipoDef?.tabs||['1. Instrumento'];
   document.getElementById('ptitle').textContent=id?'Editar Instrumento':'Nuevo Instrumento';
-  document.getElementById('pacts').innerHTML=`<div class="flex gap-2">
-    <button onclick="go('instrumentos')" class="btn bs">← Volver</button>
-    ${can?`<button onclick="saveI('${id||''}')" class="btn bp">💾 Guardar</button>`:''}
-  </div>`;
-
+  const cfg=getConfig();
   const plants=DB.get('n_plant');
   const pOpts=plants.map(p=>`<option value="${p.id}" ${instr?.plantilla_id===p.id?'selected':''}>${p.nombre}</option>`).join('');
-
-  document.getElementById('content').innerHTML=`
-  <div class="al al-i mb-4 text-sm">Los campos marcados con <span class="text-red-500 font-bold">*</span> se recomiendan completar, pero puedes guardar en cualquier momento.</div>
-  <div class="card">
-    <div class="flex gap-1 p-3 border-b border-gray-200 overflow-x-auto">
-      ${['1. Instrumento','2. Sociedad','3. Capital','4. Socios','5. Administración'].map((t,i)=>`<button class="tb ${i===0?'active':''}" id="tb${i}" onclick="swTab(${i})">${t}</button>`).join('')}
-    </div>
-    <div class="p-6">
-
-      <!-- TAB 0: INSTRUMENTO -->
-      <div id="tc0">
-        <div class="g2">
-          <div class="fg"><label class="fl r">Número de instrumento</label><input id="f-numinstr" class="fi" placeholder="Ej: 12,345" value="${instr?.numero_instrumento||''}"><p class="hint">Número oficial del instrumento notarial</p></div>
-          <div class="fg"><label class="fl r">Número de volumen</label><input id="f-vol" class="fi" placeholder="Ej: CCXLV" value="${instr?.numero_volumen||''}"></div>
-          <div class="fg"><label class="fl">Número de folios</label><input id="f-folios" class="fi" placeholder="Ej: 42" value="${instr?.numero_folios||''}"></div>
-          <div class="fg"><label class="fl r">Fecha de otorgamiento</label><input id="f-fecha" class="fi" type="date" value="${instr?.fecha_instrumento||''}"><p class="hint" id="h-fecha">${instr?.fecha_instrumento?fechaL(instr.fecha_instrumento):''}</p></div>
-          <div class="fg" style="grid-column:1/-1"><label class="fl r">Nombre de la empresa</label><input id="f-empresa" class="fi" placeholder="INNOVACIÓN TECNOLÓGICA DEL VALLE, S.A. DE C.V." value="${instr?.nombre_empresa||''}"></div>
-          <div class="fg"><label class="fl">Clave Única del Documento (CUD)</label><input id="f-cud" class="fi font-mono" placeholder="Ej: CUD-2024-001" value="${instr?.cud||''}"></div>
-          <div class="fg"><label class="fl">Fecha de expedición CUD</label><input id="f-fechacud" class="fi" type="date" value="${instr?.fecha_cud||''}"></div>
-          <div class="fg" style="grid-column:1/-1"><label class="fl">Plantilla .docx (machote)</label>
-            <select id="f-plantilla" class="fsl"><option value="">— Sin plantilla —</option>${pOpts}</select>
-            <p class="hint">Selecciona el machote que se usará para generar el documento</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 1: SOCIEDAD -->
-      <div id="tc1" class="hidden">
-        <div class="fg"><label class="fl r">Objeto social completo</label><textarea id="f-objeto" class="fta" rows="5" placeholder="La adquisición, enajenación, uso, arrendamiento, importación y exportación de toda clase de bienes...">${instr?.objeto_social||''}</textarea></div>
-        <div class="g2">
-          <div class="fg"><label class="fl r">Duración de la sociedad</label><input id="f-duracion" class="fi" placeholder="Ej: Noventa y nueve años" value="${instr?.duracion_sociedad||'Noventa y nueve años'}"></div>
-          <div class="fg"><label class="fl r">Ciudad y Estado del domicilio social</label><input id="f-domicilio" class="fi" placeholder="Ej: Metepec, Estado de México" value="${instr?.domicilio_social||'Metepec, Estado de México'}"></div>
-        </div>
-      </div>
-
-      <!-- TAB 2: CAPITAL -->
-      <div id="tc2" class="hidden">
-        <div class="g3">
-          <div class="fg"><label class="fl r">Capital mínimo fijo ($)</label><input id="f-capital" class="fi" type="number" min="0" placeholder="50000" value="${instr?.capital_minimo||''}" oninput="recalc()"><p class="hint" id="h-cap">${instr?.capital_minimo?monL(instr.capital_minimo):''}</p></div>
-          <div class="fg"><label class="fl r">Número total de acciones</label><input id="f-acciones" class="fi" type="number" min="1" placeholder="50" value="${instr?.numero_acciones||''}" oninput="recalc()"><p class="hint" id="h-acc">${instr?.numero_acciones?numL(instr.numero_acciones)+' acciones':''}</p></div>
-          <div class="fg"><label class="fl r">Valor nominal por acción ($)</label><input id="f-nominal" class="fi" type="number" min="0" placeholder="1000" value="${instr?.valor_nominal||''}" oninput="recalc()"><p class="hint" id="h-nom">${instr?.valor_nominal?monL(instr.valor_nominal)+' por acción':''}</p></div>
-        </div>
-        <div class="g2 mt-2">
-          <div class="fg"><label class="fl">Capital en letra <span class="text-gray-400 font-normal">(editable)</span></label><input id="f-cap-l" class="fi text-sm" value="${instr?.capital_minimo_letra||''}"></div>
-          <div class="fg"><label class="fl">Acciones en letra <span class="text-gray-400 font-normal">(editable)</span></label><input id="f-acc-l" class="fi text-sm" value="${instr?.numero_acciones_letra||''}"></div>
-        </div>
-        <div class="al al-i text-xs">Los campos "en letra" se calculan automáticamente al capturar los números, pero puedes editarlos manualmente para ajustar el texto jurídico.</div>
-      </div>
-
-      <!-- TAB 3: SOCIOS -->
-      <div id="tc3" class="hidden">
-        <div class="flex justify-between items-center mb-4">
-          <p class="text-sm text-gray-600" id="scnt">${F.socios.length} socio(s)</p>
-          ${can?`<button onclick="addS()" class="btn bs text-sm">+ Agregar socio</button>`:''}
-        </div>
-        <div id="socios-c"></div>
-        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
-          <div class="g3 text-sm">
-            <div><p class="text-xs text-gray-500 mb-1">Total acciones</p><p class="font-mono font-semibold" id="tot-a">0</p></div>
-            <div><p class="text-xs text-gray-500 mb-1">Total aportado</p><p class="font-mono font-semibold" id="tot-i">$0.00</p></div>
-            <div><p class="text-xs text-gray-500 mb-1">Capital declarado</p><p class="font-mono font-semibold" id="cap-d">$0.00</p></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 4: ADMINISTRACIÓN -->
-      <div id="tc4" class="hidden">
-        <div class="st">Administrador Único</div>
-        <div class="g2">
-          <div class="fg"><label class="fl r">Nombre completo</label><input id="f-admin" class="fi" placeholder="Nombre del Administrador Único" value="${instr?.nombre_administrador||''}"></div>
-          <div class="fg"><label class="fl r">RFC del Administrador</label><input id="f-rfc-admin" class="fi font-mono" maxlength="13" placeholder="XXXX000000XXX" value="${instr?.rfc_administrador||''}" oninput="this.value=this.value.toUpperCase()"></div>
-        </div>
-        <div class="st">Comisario</div>
-        <div class="g2">
-          <div class="fg"><label class="fl r">Nombre completo</label><input id="f-comisario" class="fi" placeholder="Nombre del Comisario" value="${instr?.nombre_comisario||''}"></div>
-          <div class="fg"><label class="fl r">RFC del Comisario</label><input id="f-rfc-com" class="fi font-mono" maxlength="13" placeholder="XXXX000000XXX" value="${instr?.rfc_comisario||''}" oninput="this.value=this.value.toUpperCase()"></div>
-        </div>
-        ${can?`<div class="mt-6 pt-5 border-t border-gray-200 flex flex-wrap gap-3">
-          <button onclick="saveI('${id||''}')" class="btn bp">💾 Guardar borrador</button>
-          <button onclick="genDoc('${id||''}')" id="btngen" class="btn bg">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            Generar y Descargar .docx
-          </button>
-          <button onclick="reDescargar('${id||''}')" id="btndl" class="${instr?.docx?'btn bc':'hidden'}">⬇ Descargar de nuevo</button>
-        </div>`:`<div class="mt-4">${instr?.docx?`<button onclick="reDescargar('${id}')" class="btn bc">⬇ Descargar .docx</button>`:''}</div>`}
-      </div>
-    </div>
+  const tipoOpts=Object.entries(TIPOS_INSTRUMENTO).map(([k,v])=>`<option value="${k}" ${tipoActual===k?'selected':''}>${v.label}</option>`).join('');
+  document.getElementById('pacts').innerHTML=`<div class="flex gap-2">
+    <button onclick="go('instrumentos')" class="btn bs">← Volver</button>
+    <button onclick="showVarsGuide()" class="btn bs">📋 Variables</button>
+    ${can?`<button onclick="saveI('${id||''}')" class="btn bp">💾 Guardar</button>`:''}
   </div>`;
-
-  document.getElementById('f-fecha')?.addEventListener('input',e=>{document.getElementById('h-fecha').textContent=e.target.value?fechaL(e.target.value):''});
-  renderSocios(can);recalc();
+  // Tab 0 (instrumento) is always shown first; type-specific tabs follow
+  const tabHdr=tabs.map((t,i)=>`<button class="tb ${i===0?'active':''}" id="tb${i}" onclick="swTab(${i})">${t}</button>`).join('');
+  // Common tab 0 content
+  const tc0=`<div id="tc0">
+    <div class="fg" style="margin-bottom:18px;padding:14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0">
+      <label class="fl r" style="font-size:14px;font-weight:600;color:#1e40af">Tipo de instrumento</label>
+      <select id="f-tipo" class="fsl" style="font-size:15px" onchange="cambiarTipo(this.value)">${tipoOpts}</select>
+    </div>
+    <div class="g2">
+      <div class="fg"><label class="fl r">Número de instrumento</label><input id="f-numinstr" class="fi" placeholder="Ej: 12,345" value="${instr?.numero_instrumento||''}"></div>
+      <div class="fg"><label class="fl">Número de volumen</label><input id="f-vol" class="fi" placeholder="Ej: CCXLV" value="${instr?.numero_volumen||''}"></div>
+      <div class="fg"><label class="fl">Número de folios</label><input id="f-folios" class="fi" placeholder="Ej: 42" value="${instr?.numero_folios||''}"></div>
+      <div class="fg"><label class="fl r">Fecha de otorgamiento</label><input id="f-fecha" class="fi" type="date" value="${instr?.fecha_instrumento||''}"><p class="hint" id="h-fecha">${instr?.fecha_instrumento?fechaL(instr.fecha_instrumento):''}</p></div>
+      <div class="fg"><label class="fl">Ciudad y Estado</label><input id="f-ciudad-estado" class="fi" value="${instr?.ciudad_estado||cfg.ciudad_estado}"></div>
+      <div class="fg" style="grid-column:1/-1"><label class="fl">Plantilla .docx (machote)</label>
+        <select id="f-plantilla" class="fsl"><option value="">— Sin plantilla —</option>${pOpts}</select>
+        <div class="flex gap-2 mt-1"><p class="hint flex-1">Machote Word que se usará para generar el documento final</p><button onclick="(()=>{const pid=document.getElementById('f-plantilla').value;if(pid)showDiagnostic(pid);else toast('Selecciona una plantilla primero','warn');})()" class="btn bw text-xs py-1 px-2">🔍 Diagnóstico</button></div>
+      </div>
+    </div>
+    ${renderTab0Extra(tipoActual,instr,can)}
+  </div>`;
+  // Type-specific remaining tabs
+  const tcRest=renderTypeContent(tipoActual,instr,can,id);
+  document.getElementById('content').innerHTML=`
+    <div class="al al-i mb-4 text-sm">Los campos marcados con <span class="text-red-500 font-bold">*</span> se recomiendan completar. Puedes guardar en cualquier momento.</div>
+    <div class="card">
+      <div class="flex gap-1 p-3 border-b border-gray-200 overflow-x-auto">${tabHdr}</div>
+      <div class="p-6">${tc0}${tcRest}</div>
+    </div>`;
+  document.getElementById('f-fecha')?.addEventListener('input',e=>{document.getElementById('h-fecha').textContent=e.target.value?fechaL(e.target.value):'';});
+  if(tipoActual==='SA'){renderSocios(can);recalc();}
+  if(tipoActual==='PODER'){renderOtorgantes(can);}
 }
+function renderTab0Extra(tipo,instr,can){
+  if(tipo==='SA') return`<div class="g2 mt-2">
+    <div class="fg" style="grid-column:1/-1"><label class="fl r">Nombre de la empresa</label><input id="f-empresa" class="fi" placeholder="EMPRESA, S.A. DE C.V." value="${instr?.nombre_empresa||''}"></div>
+    <div class="fg"><label class="fl">Clave Única del Documento (CUD)</label><input id="f-cud" class="fi font-mono" placeholder="CUD-2024-001" value="${instr?.cud||''}"></div>
+    <div class="fg"><label class="fl">Fecha de expedición CUD</label><input id="f-fechacud" class="fi" type="date" value="${instr?.fecha_cud||''}"></div>
+  </div>`;
+  if(tipo==='PODER') return`<div class="g2 mt-2">
+    <div class="fg"><label class="fl">Acto</label><input id="f-acto" class="fi" value="${instr?.acto||'PODER GENERAL'}" placeholder="PODER GENERAL"></div>
+  </div>`;
+  if(tipo==='OTRO') return`<div class="fg mt-2"><label class="fl r">Título del instrumento</label><input id="f-titulo" class="fi" value="${instr?.titulo||''}" placeholder="Nombre descriptivo del acto"></div>`;
+  return '';
+}
+function renderTypeContent(tipo,instr,can,id){
+  const formActsBtns=can?`<div class="mt-6 pt-5 border-t border-gray-200 flex flex-wrap gap-3">
+    <button onclick="saveI('${id||''}')" class="btn bp">💾 Guardar borrador</button>
+    <button onclick="genDoc('${id||''}')" id="btngen" class="btn bg"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>Generar .docx</button>
+    <button onclick="reDescargar('${id||''}')" id="btndl" class="${instr?.docx?'btn bc':'hidden'}">⬇ Descargar de nuevo</button>
+  </div>`:(instr?.docx?`<button onclick="reDescargar('${id}')" class="btn bc mt-4">⬇ Descargar .docx</button>`:'');
+  switch(tipo){
+    case 'SA': return renderContentSA(instr,can,formActsBtns);
+    case 'PODER': return renderContentPODER(instr,can,formActsBtns);
+    case 'COMPRAVENTA': return renderContentCOMPRAVENTA(instr,can,formActsBtns);
+    case 'OTRO': return renderContentOTRO(instr,can,formActsBtns);
+    default: return renderContentSA(instr,can,formActsBtns);
+  }
+}
+function renderContentSA(instr,can,btns){return`
+  <div id="tc1" class="hidden">
+    <div class="fg"><label class="fl r">Objeto social completo</label><textarea id="f-objeto" class="fta" rows="5" placeholder="La adquisición, enajenación, uso, arrendamiento...">${instr?.objeto_social||''}</textarea></div>
+    <div class="g2">
+      <div class="fg"><label class="fl r">Duración de la sociedad</label><input id="f-duracion" class="fi" value="${instr?.duracion_sociedad||'Noventa y nueve años'}"></div>
+      <div class="fg"><label class="fl r">Domicilio social</label><input id="f-domicilio" class="fi" value="${instr?.domicilio_social||'Metepec, Estado de México'}"></div>
+    </div>
+  </div>
+  <div id="tc2" class="hidden">
+    <div class="g3">
+      <div class="fg"><label class="fl r">Capital mínimo fijo ($)</label><input id="f-capital" class="fi" type="number" min="0" placeholder="50000" value="${instr?.capital_minimo||''}" oninput="recalc()"><p class="hint" id="h-cap">${instr?.capital_minimo?monL(instr.capital_minimo):''}</p></div>
+      <div class="fg"><label class="fl r">Número total de acciones</label><input id="f-acciones" class="fi" type="number" min="1" placeholder="50" value="${instr?.numero_acciones||''}" oninput="recalc()"><p class="hint" id="h-acc">${instr?.numero_acciones?numL(instr.numero_acciones)+' acciones':''}</p></div>
+      <div class="fg"><label class="fl r">Valor nominal por acción ($)</label><input id="f-nominal" class="fi" type="number" min="0" placeholder="1000" value="${instr?.valor_nominal||''}" oninput="recalc()"><p class="hint" id="h-nom">${instr?.valor_nominal?monL(instr.valor_nominal)+' por acción':''}</p></div>
+    </div>
+    <div class="g2 mt-2">
+      <div class="fg"><label class="fl">Capital en letra (editable)</label><input id="f-cap-l" class="fi text-sm" value="${instr?.capital_minimo_letra||''}"></div>
+      <div class="fg"><label class="fl">Acciones en letra (editable)</label><input id="f-acc-l" class="fi text-sm" value="${instr?.numero_acciones_letra||''}"></div>
+    </div>
+    <div class="al al-i text-xs mt-2">Se calculan automáticamente pero puedes editar el texto jurídico.</div>
+  </div>
+  <div id="tc3" class="hidden">
+    <div class="flex justify-between items-center mb-4">
+      <p class="text-sm text-gray-600" id="scnt">${F.socios.length} socio(s)</p>
+      ${can?`<button onclick="addS()" class="btn bs text-sm">+ Agregar socio</button>`:''}
+    </div>
+    <div id="socios-c"></div>
+    <div class="mt-4 p-4 bg-gray-50 rounded-lg"><div class="g3 text-sm">
+      <div><p class="text-xs text-gray-500 mb-1">Total acciones</p><p class="font-mono font-semibold" id="tot-a">0</p></div>
+      <div><p class="text-xs text-gray-500 mb-1">Total aportado</p><p class="font-mono font-semibold" id="tot-i">$0.00</p></div>
+      <div><p class="text-xs text-gray-500 mb-1">Capital declarado</p><p class="font-mono font-semibold" id="cap-d">$0.00</p></div>
+    </div></div>
+  </div>
+  <div id="tc4" class="hidden">
+    <div class="st">Administrador Único</div>
+    <div class="g2">
+      <div class="fg"><label class="fl r">Nombre completo</label><input id="f-admin" class="fi" placeholder="Nombre del Administrador Único" value="${instr?.nombre_administrador||''}"></div>
+      <div class="fg"><label class="fl r">RFC</label><input id="f-rfc-admin" class="fi font-mono" maxlength="13" placeholder="XXXX000000XXX" value="${instr?.rfc_administrador||''}" oninput="this.value=this.value.toUpperCase()"></div>
+    </div>
+    <div class="st">Comisario</div>
+    <div class="g2">
+      <div class="fg"><label class="fl r">Nombre completo</label><input id="f-comisario" class="fi" placeholder="Nombre del Comisario" value="${instr?.nombre_comisario||''}"></div>
+      <div class="fg"><label class="fl r">RFC</label><input id="f-rfc-com" class="fi font-mono" maxlength="13" placeholder="XXXX000000XXX" value="${instr?.rfc_comisario||''}" oninput="this.value=this.value.toUpperCase()"></div>
+    </div>
+    ${btns}
+  </div>`;}
+
+function renderContentPODER(instr,can,btns){return`
+  <div id="tc1" class="hidden">
+    <div class="flex justify-between items-center mb-4">
+      <p class="text-sm text-gray-600" id="scnt">${F.otorgantes.length} otorgante(s)</p>
+      ${can?`<button onclick="addOtorgante()" class="btn bs text-sm">+ Agregar otorgante</button>`:''}
+    </div>
+    <div id="otorgantes-c"></div>
+  </div>
+  <div id="tc2" class="hidden">
+    <div class="al al-i text-sm mb-4">Datos del apoderado (quien recibe el poder).</div>
+    ${personaCard(F.apoderado,0,can,'uap',false,'apod')}
+  </div>
+  <div id="tc3" class="hidden">
+    <div class="fg"><label class="fl r">Facultades otorgadas</label>
+      <div class="mb-2 flex flex-wrap gap-2">${['PODER GENERAL PARA PLEITOS Y COBRANZAS','PODER GENERAL PARA ACTOS DE ADMINISTRACIÓN','PODER GENERAL PARA ACTOS DE DOMINIO','PODER ESPECIAL PARA TRÁMITES ADMINISTRATIVOS'].map(f=>`<button type="button" onclick="toggleFacultad(this,'${f}')" class="btn bs text-xs py-1 px-3">${f}</button>`).join('')}</div>
+      <textarea id="f-facultades" class="fta" rows="5" placeholder="Facultades que se otorgan...">${instr?.facultades||''}</textarea>
+    </div>
+    <div class="g2">
+      <div class="fg"><label class="fl">Limitación del poder</label><textarea id="f-limitacion" class="fta" rows="3" placeholder="Sin limitaciones / o escribe las limitaciones...">${instr?.limitacion||''}</textarea></div>
+      <div class="fg"><label class="fl">Vigencia</label><input id="f-vigencia" class="fi" value="${instr?.vigencia||'INDEFINIDA'}" placeholder="INDEFINIDA o fecha de expiración"></div>
+    </div>
+    ${btns}
+  </div>`;}
+
+function renderContentCOMPRAVENTA(instr,can,btns){return`
+  <div id="tc1" class="hidden">
+    <div class="al al-i text-sm mb-4">Datos del vendedor.</div>
+    ${personaCard(F.vendedor,0,can,'uvd',false,'vd')}
+  </div>
+  <div id="tc2" class="hidden">
+    <div class="al al-i text-sm mb-4">Datos del comprador.</div>
+    ${personaCard(F.comprador,0,can,'ucp',false,'cp')}
+  </div>
+  <div id="tc3" class="hidden">
+    <div class="st" style="margin-top:0">Descripción del inmueble</div>
+    <div class="fg"><label class="fl r">Descripción completa</label><textarea id="f-inm-desc" class="fta" rows="4" placeholder="Casa habitación / Terreno / Departamento...">${instr?.inmueble?.descripcion||''}</textarea></div>
+    <div class="g2">
+      <div class="fg"><label class="fl">Superficie (m²)</label><input id="f-inm-sup" class="fi" placeholder="120.00 m²" value="${instr?.inmueble?.superficie||''}"></div>
+      <div class="fg"><label class="fl">Ubicación / Dirección</label><input id="f-inm-ubic" class="fi" placeholder="Calle, número, colonia, CP, ciudad" value="${instr?.inmueble?.ubicacion||''}"></div>
+    </div>
+    <div class="fg"><label class="fl">Linderos</label><textarea id="f-inm-linderos" class="fta" rows="3" placeholder="Norte: ..., Sur: ..., Oriente: ..., Poniente: ...">${instr?.inmueble?.linderos||''}</textarea></div>
+    <div class="st">Condiciones económicas</div>
+    <div class="g2">
+      <div class="fg"><label class="fl r">Precio de venta ($)</label><input id="f-precio" class="fi" type="number" min="0" value="${instr?.precio||''}" oninput="document.getElementById('h-precio').textContent=this.value?monL(parseFloat(this.value)):''"><p class="hint" id="h-precio">${instr?.precio?monL(instr.precio):''}</p></div>
+      <div class="fg"><label class="fl">Precio en letra (editable)</label><input id="f-precio-l" class="fi text-sm" value="${instr?.precio_letra||''}"></div>
+    </div>
+    <div class="fg"><label class="fl r">Forma de pago</label><textarea id="f-forma-pago" class="fta" rows="3" placeholder="El precio se paga en este acto en efectivo...">${instr?.forma_pago||''}</textarea></div>
+    ${btns}
+  </div>`;}
+
+function renderContentOTRO(instr,can,btns){return`
+  <div id="tc1" class="hidden">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <p class="font-medium text-gray-900">Campos personalizados</p>
+        <p class="text-xs text-gray-500 mt-1">Define los campos que se sustituirán en tu plantilla con <code class="font-mono bg-gray-100 px-1">{{nombre_campo}}</code></p>
+      </div>
+      ${can?`<button onclick="addCampo()" class="btn bp text-sm">+ Agregar campo</button>`:''}
+    </div>
+    <div id="campos-c"></div>
+    ${btns}
+  </div>`;}
+
 
 function swTab(i){
   F.tab=i;
   document.querySelectorAll('.tb').forEach((b,j)=>b.classList.toggle('active',j===i));
   document.querySelectorAll('[id^="tc"]').forEach((c,j)=>c.classList.toggle('hidden',j!==i));
-  if(i===3)renderSocios(APP.u.role!=='CONSULTA');
+  const can=APP.u.role!=='CONSULTA';
+  if(F.tipo==='SA'&&i===3)renderSocios(can);
+  if(F.tipo==='PODER'&&i===1)renderOtorgantes(can);
+  if(F.tipo==='OTRO'&&i===1)renderCampos(can);
 }
 function recalc(){
   const cap=parseFloat(document.getElementById('f-capital')?.value||'0');
@@ -520,78 +724,148 @@ function recalc(){
   const cd=document.getElementById('cap-d');if(cd)cd.textContent='$'+cap.toLocaleString(undefined,{minimumFractionDigits:2});
 }
 
-// ─── SOCIOS ───────────────────────────────────────────────────────────────────
+// ─── SOCIOS / PERSONAS ────────────────────────────────────────────────────────
 const APD=['D','E','F','G','H','I','J','K'];
-function newSocio(i){return{_id:uid(),nombre_completo:'',genero:'masculino',nacionalidad:'mexicana',nac_padres:'mexicanos',lugar_nac:'',fecha_nac:'',estado_civil:'soltero',profesion:'',dom_calle:'',dom_numero:'',dom_colonia:'',dom_cp:'',dom_ciudad:'',dom_estado:'Estado de México',tipo_id:'Credencial para Votar',aut_id:'el Instituto Nacional Electoral',clave_elector:'',apendice:APD[i]||'D',curp:'',rfc:'',num_acciones:0,importe:0,texto_generales:''};}
+function newSocio(i){return{...newPersona(i),num_acciones:0,importe:0,texto_generales:''};}
 function addS(){F.socios.push(newSocio(F.socios.length));renderSocios(true);}
 function remS(i){if(F.socios.length<=1){toast('Debe haber al menos un socio','warn');return;}F.socios.splice(i,1);renderSocios(true);}
 function togS(i){const b=document.getElementById('sb'+i);b.classList.toggle('open');document.getElementById('sarr'+i).style.transform=b.classList.contains('open')?'rotate(180deg)':'';}
 
 function renderSocios(can){
   const c=document.getElementById('socios-c');if(!c)return;
-  c.innerHTML=F.socios.map((s,i)=>scCard(s,i,can)).join('');
+  c.innerHTML=F.socios.map((s,i)=>{
+    const card=personaCard(s,i,can,'us',true,'s'+i);
+    return`<div class="sc mb-2">
+      <div class="sh" onclick="togS(${i})">
+        <div class="flex items-center gap-3">
+          <div class="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-700">${i+1}</div>
+          <div><p class="font-medium text-gray-900 text-sm" id="sn${i}">${s.nombre_completo||'Socio '+(i+1)}</p><p class="text-xs text-gray-500">${s.num_acciones||0} acciones · $${(s.importe||0).toLocaleString()}</p></div>
+        </div>
+        <div class="flex items-center gap-2">
+          ${can?`<button onclick="event.stopPropagation();remS(${i})" class="btn bd text-xs py-1 px-2">Eliminar</button>`:''}
+          <svg id="sarr${i}" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+      <div id="sb${i}" class="sb ${i===0?'open':''}">
+        ${personaCardBody(s,i,can,'us',true,'s'+i)}
+      </div>
+    </div>`;
+  }).join('');
   document.getElementById('scnt').textContent=F.socios.length+' socio(s)';
   calcTots();
 }
-function scCard(s,i,can){return`<div class="sc">
-  <div class="sh" onclick="togS(${i})">
-    <div class="flex items-center gap-3">
-      <div class="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">${i+1}</div>
-      <div><p class="font-medium text-gray-900 text-sm" id="sn${i}">${s.nombre_completo||'Socio '+(i+1)}</p><p class="text-xs text-gray-500">${s.num_acciones||0} acciones · $${(s.importe||0).toLocaleString()}</p></div>
-    </div>
-    <div class="flex items-center gap-2">
-      ${can?`<button onclick="event.stopPropagation();remS(${i})" class="btn bd text-xs py-1 px-2">Eliminar</button>`:''}
-      <svg id="sarr${i}" class="w-4 h-4 text-gray-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-    </div>
-  </div>
-  <div id="sb${i}" class="sb ${i===0?'open':''}">
-    <div class="st">Datos personales</div>
+function personaCardBody(s,i,can,updateFn,showAcciones,prefix){
+  const g=(f)=>`${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'${f}',this.value)`;
+  const fid=prefix;
+  return`<div class="p-4">
+    <div class="st" style="margin-top:0">Datos personales</div>
     <div class="g2">
-      <div class="fg" style="grid-column:1/-1"><label class="fl r">Nombre completo (MAYÚSCULAS)</label><input class="fi" value="${s.nombre_completo||''}" oninput="us(${i},'nombre_completo',this.value)" placeholder="JUAN PÉREZ GARCÍA"></div>
-      <div class="fg"><label class="fl">Género</label><select class="fsl" onchange="us(${i},'genero',this.value)"><option value="masculino" ${s.genero!=='femenino'?'selected':''}>Masculino</option><option value="femenino" ${s.genero==='femenino'?'selected':''}>Femenino</option></select></div>
-      <div class="fg"><label class="fl">Estado civil</label><select class="fsl" onchange="us(${i},'estado_civil',this.value)">${['soltero','casado','divorciado','viudo','unión libre'].map(ec=>`<option value="${ec}" ${s.estado_civil===ec?'selected':''}>${ec.charAt(0).toUpperCase()+ec.slice(1)}</option>`).join('')}</select></div>
-      <div class="fg"><label class="fl r">Nacionalidad</label><input class="fi" value="${s.nacionalidad||'mexicana'}" oninput="us(${i},'nacionalidad',this.value)"></div>
-      <div class="fg"><label class="fl">Nac. de los padres</label><input class="fi" value="${s.nac_padres||'mexicanos'}" oninput="us(${i},'nac_padres',this.value)"></div>
-      <div class="fg"><label class="fl r">Lugar de nacimiento</label><input class="fi" value="${s.lugar_nac||''}" oninput="us(${i},'lugar_nac',this.value)" placeholder="Ciudad de México"></div>
-      <div class="fg"><label class="fl r">Fecha de nacimiento</label><input class="fi" type="date" value="${s.fecha_nac||''}" oninput="us(${i},'fecha_nac',this.value);showFL(${i})"><p class="hint text-blue-600" id="fl${i}">${s.fecha_nac?fechaL(s.fecha_nac):''}</p></div>
-      <div class="fg"><label class="fl r">Profesión / Ocupación</label><input class="fi" value="${s.profesion||''}" oninput="us(${i},'profesion',this.value)" placeholder="empresario"></div>
+      <div class="fg" style="grid-column:1/-1"><label class="fl r">Nombre completo (MAYÚSCULAS)</label><input class="fi" value="${s.nombre_completo||''}" oninput="${g('nombre_completo')};this.value=this.value.toUpperCase();if(document.getElementById('sn${i}'))document.getElementById('sn${i}').textContent=this.value||'Socio '+(${i}+1);if(document.getElementById('pn${fid}'))document.getElementById('pn${fid}').textContent=this.value||'Sin nombre'" placeholder="JUAN PÉREZ GARCÍA"></div>
+      <div class="fg"><label class="fl">Género</label><select class="fsl" onchange="${g('genero')}"><option value="masculino" ${s.genero!=='femenino'?'selected':''}>Masculino</option><option value="femenino" ${s.genero==='femenino'?'selected':''}>Femenino</option></select></div>
+      <div class="fg"><label class="fl">Estado civil</label><select class="fsl" onchange="${g('estado_civil')}">${['soltero','casado','divorciado','viudo','unión libre'].map(ec=>`<option value="${ec}" ${s.estado_civil===ec?'selected':''}>${ec.charAt(0).toUpperCase()+ec.slice(1)}</option>`).join('')}</select></div>
+      <div class="fg"><label class="fl">Nacionalidad</label><input class="fi" value="${s.nacionalidad||'mexicana'}" oninput="${g('nacionalidad')}"></div>
+      <div class="fg"><label class="fl">Nac. de los padres</label><input class="fi" value="${s.nac_padres||'mexicanos'}" oninput="${g('nac_padres')}"></div>
+      <div class="fg"><label class="fl r">Lugar de nacimiento</label><input class="fi" value="${s.lugar_nac||''}" oninput="${g('lugar_nac')}" placeholder="Ciudad de México"></div>
+      <div class="fg"><label class="fl r">Fecha de nacimiento</label><input class="fi" type="date" value="${s.fecha_nac||''}" oninput="${g('fecha_nac')};document.getElementById('pfl${fid}').textContent=this.value?fechaL(this.value):''"><p class="hint text-blue-600" id="pfl${fid}">${s.fecha_nac?fechaL(s.fecha_nac):''}</p></div>
+      <div class="fg"><label class="fl">Profesión / Ocupación</label><input class="fi" value="${s.profesion||''}" oninput="${g('profesion')}" placeholder="empresario"></div>
     </div>
     <div class="st">Domicilio completo</div>
     <div class="g2">
-      <div class="fg"><label class="fl">Calle</label><input class="fi" value="${s.dom_calle||''}" oninput="us(${i},'dom_calle',this.value)"></div>
-      <div class="fg"><label class="fl">Número exterior</label><input class="fi" value="${s.dom_numero||''}" oninput="us(${i},'dom_numero',this.value)"></div>
-      <div class="fg"><label class="fl">Colonia</label><input class="fi" value="${s.dom_colonia||''}" oninput="us(${i},'dom_colonia',this.value)"></div>
-      <div class="fg"><label class="fl">Código Postal</label><input class="fi" value="${s.dom_cp||''}" oninput="us(${i},'dom_cp',this.value)"></div>
-      <div class="fg"><label class="fl">Ciudad</label><input class="fi" value="${s.dom_ciudad||''}" oninput="us(${i},'dom_ciudad',this.value)"></div>
-      <div class="fg"><label class="fl">Estado</label><input class="fi" value="${s.dom_estado||'Estado de México'}" oninput="us(${i},'dom_estado',this.value)"></div>
+      <div class="fg"><label class="fl">Calle</label><input class="fi" value="${s.dom_calle||''}" oninput="${g('dom_calle')}"></div>
+      <div class="fg"><label class="fl">Número exterior</label><input class="fi" value="${s.dom_numero||''}" oninput="${g('dom_numero')}"></div>
+      <div class="fg"><label class="fl">Colonia</label><input class="fi" value="${s.dom_colonia||''}" oninput="${g('dom_colonia')}"></div>
+      <div class="fg"><label class="fl">Código Postal</label><input class="fi" value="${s.dom_cp||''}" oninput="${g('dom_cp')}"></div>
+      <div class="fg"><label class="fl">Ciudad</label><input class="fi" value="${s.dom_ciudad||''}" oninput="${g('dom_ciudad')}"></div>
+      <div class="fg"><label class="fl">Estado</label><input class="fi" value="${s.dom_estado||'Estado de México'}" oninput="${g('dom_estado')}"></div>
     </div>
     <div class="st">Identificación oficial</div>
     <div class="g2">
-      <div class="fg"><label class="fl">Tipo de identificación</label><select class="fsl" onchange="us(${i},'tipo_id',this.value)"><option value="Credencial para Votar" ${s.tipo_id==='Credencial para Votar'?'selected':''}>Credencial para Votar</option><option value="Pasaporte" ${s.tipo_id==='Pasaporte'?'selected':''}>Pasaporte</option><option value="Cédula Profesional" ${s.tipo_id==='Cédula Profesional'?'selected':''}>Cédula Profesional</option></select></div>
-      <div class="fg"><label class="fl">Autoridad que expide</label><input class="fi" value="${s.aut_id||'el Instituto Nacional Electoral'}" oninput="us(${i},'aut_id',this.value)"></div>
-      <div class="fg"><label class="fl">Clave de Elector</label><input class="fi font-mono" maxlength="18" value="${s.clave_elector||''}" oninput="us(${i},'clave_elector',this.value.toUpperCase());this.value=this.value.toUpperCase()"></div>
-      <div class="fg"><label class="fl">Letra apéndice</label><input class="fi" maxlength="2" value="${s.apendice||'D'}" oninput="us(${i},'apendice',this.value.toUpperCase());this.value=this.value.toUpperCase()"></div>
-      <div class="fg"><label class="fl r">CURP (18 caracteres)</label><input class="fi font-mono" maxlength="18" value="${s.curp||''}" oninput="us(${i},'curp',this.value.toUpperCase());this.value=this.value.toUpperCase();chkLen(this,18,'CURP debe tener 18 caracteres')" placeholder="GAPM820521HMCRZN09"><p class="hint" id="hcurp${i}"></p></div>
-      <div class="fg"><label class="fl r">RFC (12-13 caracteres)</label><input class="fi font-mono" maxlength="13" value="${s.rfc||''}" oninput="us(${i},'rfc',this.value.toUpperCase());this.value=this.value.toUpperCase();chkLen(this,12,'RFC debe tener al menos 12 caracteres',13)" placeholder="GAPM820521U71"><p class="hint" id="hrfc${i}"></p></div>
+      <div class="fg"><label class="fl">Tipo de ID</label><select class="fsl" onchange="${g('tipo_id')}"><option value="Credencial para Votar" ${s.tipo_id==='Credencial para Votar'?'selected':''}>Credencial para Votar</option><option value="Pasaporte" ${s.tipo_id==='Pasaporte'?'selected':''}>Pasaporte</option><option value="Cédula Profesional" ${s.tipo_id==='Cédula Profesional'?'selected':''}>Cédula Profesional</option></select></div>
+      <div class="fg"><label class="fl">Autoridad que expide</label><input class="fi" value="${s.aut_id||'el Instituto Nacional Electoral'}" oninput="${g('aut_id')}"></div>
+      <div class="fg"><label class="fl">Clave de Elector</label><input class="fi font-mono" maxlength="18" value="${s.clave_elector||''}" oninput="${g('clave_elector')};this.value=this.value.toUpperCase()"></div>
+      <div class="fg"><label class="fl">Letra apéndice</label><input class="fi" maxlength="2" value="${s.apendice||APD[i]||'D'}" oninput="${g('apendice')};this.value=this.value.toUpperCase()"></div>
+      <div class="fg"><label class="fl r">CURP (18 chars)</label><input class="fi font-mono" maxlength="18" value="${s.curp||''}" oninput="${g('curp')};this.value=this.value.toUpperCase()" placeholder="GAPM820521HMCRZN09"></div>
+      <div class="fg"><label class="fl r">RFC (12-13 chars)</label><input class="fi font-mono" maxlength="13" value="${s.rfc||''}" oninput="${g('rfc')};this.value=this.value.toUpperCase()" placeholder="GAPM820521U71"></div>
     </div>
-    <div class="st">Participación accionaria</div>
+    ${showAcciones?`<div class="st">Participación accionaria</div>
     <div class="g2">
       <div class="fg"><label class="fl r">Número de acciones</label><input class="fi" type="number" min="0" value="${s.num_acciones||0}" oninput="us(${i},'num_acciones',parseInt(this.value)||0);calcTots()"></div>
-      <div class="fg"><label class="fl r">Importe total aportado ($)</label><input class="fi" type="number" min="0" value="${s.importe||0}" oninput="us(${i},'importe',parseFloat(this.value)||0);calcTots()"><p class="hint" id="himp${i}">${s.importe>0?monL(s.importe):''}</p></div>
+      <div class="fg"><label class="fl r">Importe aportado ($)</label><input class="fi" type="number" min="0" value="${s.importe||0}" oninput="us(${i},'importe',parseFloat(this.value)||0);calcTots()"><p class="hint" id="himp${fid}">${s.importe>0?monL(s.importe):''}</p></div>
     </div>
-    <div class="mt-3 p-3 bg-blue-50 rounded-lg flex items-start gap-3 flex-wrap">
-      <button onclick="prevGen(${i})" class="btn bs text-sm flex-shrink-0">👁 Ver texto de Generales</button>
-      <div id="gp${i}" class="text-xs text-gray-700 leading-relaxed font-serif hidden w-full mt-1 p-3 bg-white rounded border border-blue-200"></div>
-    </div>
-  </div>
-</div>`;}
+    <div class="mt-3 p-3 bg-blue-50 rounded-lg">
+      <button onclick="prevGen(${i})" class="btn bs text-sm">👁 Ver texto de Generales</button>
+      <div id="gp${fid}" class="text-xs text-gray-700 leading-relaxed font-serif hidden w-full mt-2 p-3 bg-white rounded border border-blue-200"></div>
+    </div>`:''}
+  </div>`;
+}
 
 function us(i,f,v){
-  F.socios[i][f]=v;
+  if(F.socios[i])F.socios[i][f]=v;
   if(f==='nombre_completo'){const el=document.getElementById('sn'+i);if(el)el.textContent=v||'Socio '+(i+1);}
-  if(f==='importe'){const h=document.getElementById('himp'+i);if(h)h.textContent=v>0?monL(v):'';}
 }
-function showFL(i){const el=document.getElementById('fl'+i);if(el&&F.socios[i].fecha_nac)el.textContent=fechaL(F.socios[i].fecha_nac);}
+function showFL(i){const el=document.getElementById('fl'+i);if(el&&F.socios[i]?.fecha_nac)el.textContent=fechaL(F.socios[i].fecha_nac);}
+
+// PODER — otorgantes
+function addOtorgante(){F.otorgantes.push(newPersona(F.otorgantes.length));renderOtorgantes(true);}
+function remOtorgante(i){if(F.otorgantes.length<=1){toast('Debe haber al menos un otorgante','warn');return;}F.otorgantes.splice(i,1);renderOtorgantes(true);}
+function uot(i,f,v){if(F.otorgantes[i])F.otorgantes[i][f]=v;}
+function renderOtorgantes(can){
+  const c=document.getElementById('otorgantes-c');if(!c)return;
+  c.innerHTML=F.otorgantes.map((s,i)=>`<div class="sc mb-2">
+    <div class="sh" onclick="togS(${i})">
+      <div class="flex items-center gap-3">
+        <div class="w-7 h-7 bg-purple-100 rounded-full flex items-center justify-center text-xs font-bold text-purple-700">${i+1}</div>
+        <p class="font-medium text-gray-900 text-sm" id="sn${i}">${s.nombre_completo||'Otorgante '+(i+1)}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        ${can?`<button onclick="event.stopPropagation();remOtorgante(${i})" class="btn bd text-xs py-1 px-2">Eliminar</button>`:''}
+        <svg id="sarr${i}" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
+    </div>
+    <div id="sb${i}" class="sb ${i===0?'open':''}">${personaCardBody(s,i,can,'uot',false,'ot'+i)}</div>
+  </div>`).join('');
+  const cnt=document.getElementById('scnt');if(cnt)cnt.textContent=F.otorgantes.length+' otorgante(s)';
+}
+
+// PODER — apoderado
+function uap(f,v){F.apoderado[f]=v;}
+
+// COMPRAVENTA — vendedor/comprador
+function uvd(f,v){F.vendedor[f]=v;}
+function ucp(f,v){F.comprador[f]=v;}
+
+// PODER — facultades toggle
+function toggleFacultad(btn,texto){
+  const ta=document.getElementById('f-facultades');
+  if(!ta)return;
+  const actual=ta.value;
+  if(actual.includes(texto)){ta.value=actual.replace('\n'+texto,'').replace(texto,'').trim();}
+  else{ta.value=(actual?actual+'\n':'')+texto;}
+  btn.classList.toggle('bp',ta.value.includes(texto));
+  btn.classList.toggle('bs',!ta.value.includes(texto));
+}
+
+// OTRO — campos dinámicos
+function renderCampos(can){
+  const c=document.getElementById('campos-c');if(!c)return;
+  c.innerHTML=F.camposDef.map((campo,i)=>`<div class="sc mb-2 p-4">
+    <div class="g2 mb-2">
+      <div class="fg"><label class="fl text-xs">Etiqueta visible</label><input class="fi" value="${campo.label||''}" oninput="F.camposDef[${i}].label=this.value;renderCampos(${can})" placeholder="Nombre del acto"></div>
+      <div class="fg"><label class="fl text-xs">Variable en plantilla <code class="font-mono bg-gray-100 px-1">{{nombre_campo}}</code></label><input class="fi font-mono text-xs" value="${campo.nombre||''}" oninput="F.camposDef[${i}].nombre=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'_')" placeholder="nombre_acto"></div>
+      <div class="fg"><label class="fl text-xs">Tipo</label><select class="fsl" onchange="F.camposDef[${i}].tipo=this.value;renderCampos(${can})"><option value="text" ${campo.tipo==='text'?'selected':''}>Texto</option><option value="textarea" ${campo.tipo==='textarea'?'selected':''}>Texto largo</option><option value="number" ${campo.tipo==='number'?'selected':''}>Número</option><option value="date" ${campo.tipo==='date'?'selected':''}>Fecha</option></select></div>
+      <div class="fg flex items-end gap-2">
+        <label class="fl text-xs">Requerido</label>
+        <input type="checkbox" class="w-4 h-4 mt-1" ${campo.requerido?'checked':''} onchange="F.camposDef[${i}].requerido=this.checked">
+        ${can?`<button onclick="delCampo(${i})" class="btn bd text-xs py-1 px-2 ml-auto">✕ Eliminar</button>`:''}
+      </div>
+    </div>
+    <div class="fg"><label class="fl text-xs text-blue-700">Valor</label>
+      ${campo.tipo==='textarea'?`<textarea class="fta" rows="2" oninput="F.camposVal['${campo.nombre||'campo_'+i}']=this.value">${F.camposVal[campo.nombre||'campo_'+i]||''}</textarea>`:`<input class="fi" type="${campo.tipo||'text'}" value="${F.camposVal[campo.nombre||'campo_'+i]||''}" oninput="F.camposVal['${campo.nombre||'campo_'+i}']=this.value">`}
+    </div>
+  </div>`).join('')+`${F.camposDef.length===0?'<div class="text-center py-8 text-gray-400 text-sm">Sin campos definidos. Haz clic en "+ Agregar campo" para comenzar.</div>':''}`;
+}
+function addCampo(){F.camposDef.push({_id:uid(),label:'',nombre:'campo_'+(F.camposDef.length+1),tipo:'text',requerido:false});renderCampos(true);}
+function delCampo(i){F.camposDef.splice(i,1);renderCampos(true);}
 function chkLen(inp,min,msg,max){
   const l=inp.value.length;
   const ok=max?l>=min&&l<=max:l===min;
@@ -605,43 +879,193 @@ function calcTots(){
   if(ta)ta.textContent=a.toLocaleString();if(ti)ti.textContent='$'+im.toLocaleString(undefined,{minimumFractionDigits:2});
 }
 function prevGen(i){
-  const s=F.socios[i];
+  const s=F.socios[i];if(!s)return;
   const warn=[];
   if(!s.nombre_completo)warn.push('nombre');if(!s.fecha_nac)warn.push('fecha de nacimiento');if(!s.curp)warn.push('CURP');if(!s.rfc)warn.push('RFC');
-  if(warn.length>0){toast('Faltan: '+warn.join(', ')+'. El texto se generará con los datos disponibles.','warn');}
+  if(warn.length>0)toast('Faltan: '+warn.join(', ')+'. El texto se generará con los datos disponibles.','warn');
   const t=genGen(s);F.socios[i].texto_generales=t;
-  const el=document.getElementById('gp'+i);if(el){el.textContent=t;el.classList.remove('hidden');}
+  const el=document.getElementById('gps'+i);if(el){el.textContent=t;el.classList.remove('hidden');}
+}
+
+// ─── TIPO DE INSTRUMENTO ─────────────────────────────────────────────────────
+function cambiarTipo(tipo){
+  const def=TIPOS_INSTRUMENTO[tipo];
+  if(!def)return;
+  if(def._stub){
+    toast(def.label+' — próximamente disponible (pendiente campos del notario)','info');
+    const sel=document.getElementById('f-tipo');
+    if(sel)sel.value=F.instr?.tipo_instrumento||F.tipo||'SA';
+    return;
+  }
+  if(!confirm('¿Cambiar el tipo de instrumento a "'+def.label+'"? El formulario se recargará.'))return;
+  go('form-instr');
+  setTimeout(()=>{
+    F=initF(tipo,null);
+    pgFormInstr(null);
+    document.getElementById('f-tipo').value=tipo;
+  },100);
+}
+
+// ─── PERSONA CARD (compartida: socios, otorgantes, vendedor, comprador) ──────
+function personaCard(s,i,can,updateFn,showAcciones=false,prefix='s'){
+  const ud=(f,v)=>`${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'${f}',this.value)`;
+  const fid=prefix+i;
+  return`<div class="sc">
+  <div class="sh" onclick="togPC('${fid}')">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">${updateFn==='us'||updateFn==='uot'?i+1:'✎'}</div>
+      <div><p class="font-medium text-gray-900 text-sm" id="pn${fid}">${s.nombre_completo||'Sin nombre'}</p></div>
+    </div>
+    <svg id="parr${fid}" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+  </div>
+  <div id="pb${fid}" class="sb open">
+    <div class="st">Datos personales</div>
+    <div class="g2">
+      <div class="fg" style="grid-column:1/-1"><label class="fl r">Nombre completo (MAYÚSCULAS)</label><input class="fi" value="${s.nombre_completo||''}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'nombre_completo',this.value.toUpperCase());this.value=this.value.toUpperCase();document.getElementById('pn${fid}').textContent=this.value||'Sin nombre'" placeholder="JUAN PÉREZ GARCÍA"></div>
+      <div class="fg"><label class="fl">Género</label><select class="fsl" onchange="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'genero',this.value)"><option value="masculino" ${s.genero!=='femenino'?'selected':''}>Masculino</option><option value="femenino" ${s.genero==='femenino'?'selected':''}>Femenino</option></select></div>
+      <div class="fg"><label class="fl">Estado civil</label><select class="fsl" onchange="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'estado_civil',this.value)">${['soltero','casado','divorciado','viudo','unión libre'].map(ec=>`<option value="${ec}" ${s.estado_civil===ec?'selected':''}>${ec.charAt(0).toUpperCase()+ec.slice(1)}</option>`).join('')}</select></div>
+      <div class="fg"><label class="fl">Nacionalidad</label><input class="fi" value="${s.nacionalidad||'mexicana'}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'nacionalidad',this.value)"></div>
+      <div class="fg"><label class="fl">Nac. de los padres</label><input class="fi" value="${s.nac_padres||'mexicanos'}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'nac_padres',this.value)"></div>
+      <div class="fg"><label class="fl r">Lugar de nacimiento</label><input class="fi" value="${s.lugar_nac||''}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'lugar_nac',this.value)" placeholder="Ciudad de México"></div>
+      <div class="fg"><label class="fl r">Fecha de nacimiento</label><input class="fi" type="date" value="${s.fecha_nac||''}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'fecha_nac',this.value);document.getElementById('pfl${fid}').textContent=this.value?fechaL(this.value):''"><p class="hint text-blue-600" id="pfl${fid}">${s.fecha_nac?fechaL(s.fecha_nac):''}</p></div>
+      <div class="fg"><label class="fl r">Profesión / Ocupación</label><input class="fi" value="${s.profesion||''}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'profesion',this.value)" placeholder="empresario"></div>
+    </div>
+    <div class="st">Domicilio completo</div>
+    <div class="g2">
+      <div class="fg"><label class="fl">Calle</label><input class="fi" value="${s.dom_calle||''}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'dom_calle',this.value)"></div>
+      <div class="fg"><label class="fl">Número exterior</label><input class="fi" value="${s.dom_numero||''}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'dom_numero',this.value)"></div>
+      <div class="fg"><label class="fl">Colonia</label><input class="fi" value="${s.dom_colonia||''}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'dom_colonia',this.value)"></div>
+      <div class="fg"><label class="fl">Código Postal</label><input class="fi" value="${s.dom_cp||''}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'dom_cp',this.value)"></div>
+      <div class="fg"><label class="fl">Ciudad</label><input class="fi" value="${s.dom_ciudad||''}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'dom_ciudad',this.value)"></div>
+      <div class="fg"><label class="fl">Estado</label><input class="fi" value="${s.dom_estado||'Estado de México'}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'dom_estado',this.value)"></div>
+    </div>
+    <div class="st">Identificación oficial</div>
+    <div class="g2">
+      <div class="fg"><label class="fl">Tipo de ID</label><select class="fsl" onchange="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'tipo_id',this.value)"><option value="Credencial para Votar" ${s.tipo_id==='Credencial para Votar'?'selected':''}>Credencial para Votar</option><option value="Pasaporte" ${s.tipo_id==='Pasaporte'?'selected':''}>Pasaporte</option><option value="Cédula Profesional" ${s.tipo_id==='Cédula Profesional'?'selected':''}>Cédula Profesional</option></select></div>
+      <div class="fg"><label class="fl">Autoridad que expide</label><input class="fi" value="${s.aut_id||'el Instituto Nacional Electoral'}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'aut_id',this.value)"></div>
+      <div class="fg"><label class="fl">Clave de Elector</label><input class="fi font-mono" maxlength="18" value="${s.clave_elector||''}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'clave_elector',this.value.toUpperCase());this.value=this.value.toUpperCase()"></div>
+      <div class="fg"><label class="fl">Letra apéndice</label><input class="fi" maxlength="2" value="${s.apendice||'D'}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'apendice',this.value.toUpperCase());this.value=this.value.toUpperCase()"></div>
+      <div class="fg"><label class="fl r">CURP (18 chars)</label><input class="fi font-mono" maxlength="18" value="${s.curp||''}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'curp',this.value.toUpperCase());this.value=this.value.toUpperCase()" placeholder="GAPM820521HMCRZN09"></div>
+      <div class="fg"><label class="fl r">RFC (12-13 chars)</label><input class="fi font-mono" maxlength="13" value="${s.rfc||''}" oninput="${updateFn}(${updateFn==='us'||updateFn==='uot'?i+',':''}'rfc',this.value.toUpperCase());this.value=this.value.toUpperCase()" placeholder="GAPM820521U71"></div>
+    </div>
+    ${showAcciones?`<div class="st">Participación accionaria</div>
+    <div class="g2">
+      <div class="fg"><label class="fl r">Número de acciones</label><input class="fi" type="number" min="0" value="${s.num_acciones||0}" oninput="${updateFn}(${i},'num_acciones',parseInt(this.value)||0);calcTots()"></div>
+      <div class="fg"><label class="fl r">Importe aportado ($)</label><input class="fi" type="number" min="0" value="${s.importe||0}" oninput="${updateFn}(${i},'importe',parseFloat(this.value)||0);calcTots();document.getElementById('himp${fid}').textContent=this.value?monL(parseFloat(this.value)):''"><p class="hint" id="himp${fid}">${s.importe>0?monL(s.importe):''}</p></div>
+    </div>
+    <div class="mt-3 p-3 bg-blue-50 rounded-lg">
+      <button onclick="prevGen(${i})" class="btn bs text-sm">👁 Ver texto de Generales</button>
+      <div id="gp${fid}" class="text-xs text-gray-700 leading-relaxed font-serif hidden w-full mt-2 p-3 bg-white rounded border border-blue-200"></div>
+    </div>`:''}
+  </div>
+</div>`;}
+function togPC(fid){const b=document.getElementById('pb'+fid);b.classList.toggle('open');document.getElementById('parr'+fid).style.transform=b.classList.contains('open')?'rotate(180deg)':'';}
+
+// ─── GUÍA DE VARIABLES SOPORTADAS ────────────────────────────────────────────
+function showVarsGuide(){
+  modal(`<div class="md p-6" style="max-width:820px">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold">📋 Variables para tu plantilla .docx</h2>
+      <button onclick="cmodal()" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+    </div>
+    <div class="al al-i text-sm mb-4">
+      Usa estas variables en tu plantilla Word con doble llave: <code class="bg-blue-50 px-1 rounded font-mono">{{nombre_instrumento}}</code>.
+      Word a veces fragmenta el texto internamente — si una variable no sustituye, selecciónala y re-escríbela manualmente en Word.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:13px">
+      <div>
+        <p class="st" style="margin-top:0">Instrumento</p>
+        ${[['numero_instrumento','12,345'],['numero_volumen','CCXLV'],['numero_folios','42'],['dia','15'],['mes','enero'],['anio','2025'],['dia_letra','quince'],['mes_letra','enero'],['anio_letra','dos mil veinticinco'],['fecha_completa','quince de enero de dos mil veinticinco'],['nombre_empresa','EMPRESA, S.A. de C.V.'],['cud','CUD-2025-001'],['fecha_cud','dos de enero de dos mil veinticinco']].map(([k,v])=>`<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #f3f4f6"><code class="font-mono text-blue-700 flex-shrink-0">{{${k}}}</code><span class="text-gray-400 truncate">${v}</span></div>`).join('')}
+        <p class="st">Sociedad</p>
+        ${[['duracion_sociedad','Noventa y nueve años'],['domicilio_social','Metepec, Edo. de México'],['objeto_social','La adquisición...']].map(([k,v])=>`<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #f3f4f6"><code class="font-mono text-blue-700 flex-shrink-0">{{${k}}}</code><span class="text-gray-400 truncate">${v}</span></div>`).join('')}
+        <p class="st">Capital</p>
+        ${[['capital_minimo','50,000.00'],['capital_minimo_letra','cincuenta mil pesos 00/100'],['numero_acciones','50'],['numero_acciones_letra','cincuenta acciones'],['valor_nominal','1,000.00'],['valor_nominal_letra','mil pesos 00/100']].map(([k,v])=>`<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #f3f4f6"><code class="font-mono text-blue-700 flex-shrink-0">{{${k}}}</code><span class="text-gray-400 truncate">${v}</span></div>`).join('')}
+        <p class="st">Administración</p>
+        ${[['nombre_administrador','JUAN PÉREZ'],['rfc_administrador','PEGJ800101XXX'],['rfc_administrador_letra','P, E, G, J...'],['nombre_comisario','MARÍA LÓPEZ'],['rfc_comisario','LOMM700202XXX'],['rfc_comisario_letra','L, O, M, M...']].map(([k,v])=>`<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #f3f4f6"><code class="font-mono text-blue-700 flex-shrink-0">{{${k}}}</code><span class="text-gray-400 truncate">${v}</span></div>`).join('')}
+      </div>
+      <div>
+        <p class="st" style="margin-top:0">Socios — dentro de <code class="font-mono bg-yellow-50 px-1">{{#socios}}...{{/socios}}</code></p>
+        ${[['nombre_completo','JUAN PÉREZ GARCÍA'],['nacionalidad','mexicana'],['nac_padres','mexicanos'],['lugar_nacimiento','Ciudad de México'],['fecha_nacimiento_letra','veinte de enero de 1980'],['estado_civil','soltero'],['profesion','empresario'],['domicilio_completo','Calle 1, núm. 23, Col. Centro, C.P. 50000, Metepec, Estado de México'],['tipo_identificacion','Credencial para Votar'],['autoridad_identificacion','el Instituto Nacional Electoral'],['clave_elector','PRGLP8001012H4900'],['apendice','D'],['curp','PEGJ800101HMCRZN09'],['curp_letra','P, E, G, J...'],['rfc','PEGJ800101XXX'],['rfc_letra','P, E, G, J...'],['numero_acciones','25'],['numero_acciones_letra','veinticinco acciones'],['importe_acciones','25,000.00'],['importe_acciones_letra','veinticinco mil pesos 00/100'],['texto_generales','[texto legal completo auto-generado]']].map(([k,v])=>`<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid #f3f4f6"><code class="font-mono text-blue-700 flex-shrink-0">{{${k}}}</code><span class="text-gray-400 truncate">${v}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="al al-w mt-4 text-xs">
+      <strong>Loops:</strong> Para listar todos los socios usa <code class="font-mono">{{#socios}}</code> al inicio del bloque y <code class="font-mono">{{/socios}}</code> al final, cada uno en su propio párrafo.
+    </div>
+    <div class="flex justify-end mt-4"><button onclick="cmodal()" class="btn bp">Cerrar</button></div>
+  </div>`);
 }
 
 // ─── LEER FORMULARIO ─────────────────────────────────────────────────────────
 function leerForm(){
-  const cap=parseFloat(document.getElementById('f-capital')?.value||'0');
-  const acc=parseInt(document.getElementById('f-acciones')?.value||'0');
-  const nom=parseFloat(document.getElementById('f-nominal')?.value||'0');
-  return{
+  const tipo=document.getElementById('f-tipo')?.value||F.tipo||'SA';
+  const cfg=getConfig();
+  const base={
+    tipo_instrumento:tipo,
     numero_instrumento:document.getElementById('f-numinstr')?.value||'',
     numero_volumen:document.getElementById('f-vol')?.value||'',
     numero_folios:document.getElementById('f-folios')?.value||'',
     fecha_instrumento:document.getElementById('f-fecha')?.value||'',
-    nombre_empresa:document.getElementById('f-empresa')?.value||'',
-    cud:document.getElementById('f-cud')?.value||'',
-    fecha_cud:document.getElementById('f-fechacud')?.value||'',
+    ciudad_estado:document.getElementById('f-ciudad-estado')?.value||cfg.ciudad_estado,
     plantilla_id:document.getElementById('f-plantilla')?.value||'',
-    objeto_social:document.getElementById('f-objeto')?.value||'',
-    duracion_sociedad:document.getElementById('f-duracion')?.value||'',
-    domicilio_social:document.getElementById('f-domicilio')?.value||'',
-    capital_minimo:cap,
-    numero_acciones:acc,
-    valor_nominal:nom,
-    capital_minimo_letra:document.getElementById('f-cap-l')?.value||(cap>0?monL(cap):''),
-    numero_acciones_letra:document.getElementById('f-acc-l')?.value||(acc>0?numL(acc)+' acciones':''),
-    valor_nominal_letra:nom>0?monL(nom):'',
-    nombre_administrador:document.getElementById('f-admin')?.value||'',
-    rfc_administrador:(document.getElementById('f-rfc-admin')?.value||'').toUpperCase(),
-    nombre_comisario:document.getElementById('f-comisario')?.value||'',
-    rfc_comisario:(document.getElementById('f-rfc-com')?.value||'').toUpperCase(),
-    socios:JSON.parse(JSON.stringify(F.socios)),
+    notario:cfg.notario,notaria:cfg.notaria,
   };
+  switch(tipo){
+    case 'SA':{
+      const cap=parseFloat(document.getElementById('f-capital')?.value||'0');
+      const acc=parseInt(document.getElementById('f-acciones')?.value||'0');
+      const nom=parseFloat(document.getElementById('f-nominal')?.value||'0');
+      return{...base,
+        nombre_empresa:document.getElementById('f-empresa')?.value||'',
+        cud:document.getElementById('f-cud')?.value||'',fecha_cud:document.getElementById('f-fechacud')?.value||'',
+        objeto_social:document.getElementById('f-objeto')?.value||'',
+        duracion_sociedad:document.getElementById('f-duracion')?.value||'',
+        domicilio_social:document.getElementById('f-domicilio')?.value||'',
+        capital_minimo:cap,numero_acciones:acc,valor_nominal:nom,
+        capital_minimo_letra:document.getElementById('f-cap-l')?.value||(cap>0?monL(cap):''),
+        numero_acciones_letra:document.getElementById('f-acc-l')?.value||(acc>0?numL(acc)+' acciones':''),
+        valor_nominal_letra:nom>0?monL(nom):'',
+        nombre_administrador:document.getElementById('f-admin')?.value||'',
+        rfc_administrador:(document.getElementById('f-rfc-admin')?.value||'').toUpperCase(),
+        nombre_comisario:document.getElementById('f-comisario')?.value||'',
+        rfc_comisario:(document.getElementById('f-rfc-com')?.value||'').toUpperCase(),
+        socios:JSON.parse(JSON.stringify(F.socios)),
+      };}
+    case 'PODER':{
+      const ot=JSON.parse(JSON.stringify(F.otorgantes));
+      return{...base,
+        acto:document.getElementById('f-acto')?.value||'PODER GENERAL',
+        facultades:document.getElementById('f-facultades')?.value||'',
+        limitacion:document.getElementById('f-limitacion')?.value||'',
+        vigencia:document.getElementById('f-vigencia')?.value||'INDEFINIDA',
+        otorgantes:ot,
+        apoderado:JSON.parse(JSON.stringify(F.apoderado)),
+        nombre_empresa:(ot[0]?.nombre_completo||'Sin otorgante')+' — '+(document.getElementById('f-acto')?.value||'Poder'),
+      };}
+    case 'COMPRAVENTA':{
+      const precio=parseFloat(document.getElementById('f-precio')?.value||'0');
+      return{...base,
+        vendedor:JSON.parse(JSON.stringify(F.vendedor)),
+        comprador:JSON.parse(JSON.stringify(F.comprador)),
+        inmueble:{
+          descripcion:document.getElementById('f-inm-desc')?.value||'',
+          superficie:document.getElementById('f-inm-sup')?.value||'',
+          ubicacion:document.getElementById('f-inm-ubic')?.value||'',
+          linderos:document.getElementById('f-inm-linderos')?.value||'',
+        },
+        precio,
+        precio_letra:document.getElementById('f-precio-l')?.value||(precio>0?monL(precio):''),
+        forma_pago:document.getElementById('f-forma-pago')?.value||'',
+        nombre_empresa:[F.vendedor?.nombre_completo,F.comprador?.nombre_completo].filter(Boolean).join(' / ')||'Compraventa',
+      };}
+    case 'OTRO':{
+      return{...base,
+        titulo:document.getElementById('f-titulo')?.value||'',
+        camposDef:JSON.parse(JSON.stringify(F.camposDef)),
+        camposVal:JSON.parse(JSON.stringify(F.camposVal)),
+        nombre_empresa:document.getElementById('f-titulo')?.value||'Instrumento libre',
+      };}
+    default: return base;
+  }
 }
 
 // ─── VALIDACIÓN SUAVE (notifica, no bloquea) ──────────────────────────────────
@@ -693,103 +1117,615 @@ async function genDoc(existId){
   if(btn){btn.disabled=true;btn.innerHTML='<span class="sp"></span> Generando...';}
   try{
     const blob=await buildDocx(instr,plant);
-    guardarDocx(id,blob);
-    // descarga inmediata
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download='Instrumento_'+(instr.numero_instrumento||'doc').replace(/[^a-zA-Z0-9]/g,'_')+'.docx';a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    const nombre='Instrumento_'+(instr.numero_instrumento||'doc').replace(/[^a-zA-Z0-9]/g,'_')+'.docx';
+    dlBlob(blob,nombre);
+    await guardarDocx(id,blob);
     const bdl=document.getElementById('btndl');if(bdl)bdl.classList.remove('hidden');
     toast('¡Documento generado y descargado!');
   }catch(e){
-    console.error(e);
-    let msg=e.message||'Error desconocido';
-    if(e.properties?.errors?.length)msg=e.properties.errors.map(er=>er.properties?.explanation||er.message).filter(Boolean).join(' | ');
-    toast('Error al generar: '+msg,'err');
+    console.error('Error genDoc:',e);
+    errModal('Error al generar el documento','<b>Detalle:</b> '+(e.message||String(e))+
+      '<br><br>Usa el botón <b>🔍 Diagnóstico</b> junto al selector de plantilla para verificar las variables.');
   }finally{
     if(btn){btn.disabled=false;btn.innerHTML='<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>Generar y Descargar .docx';}
   }
 }
 
-async function buildDocx(instr,plant){
-  // plant puede ser undefined si se llama desde lista con datos ya guardados
-  if(!plant)plant=DB.one('n_plant',instr.plantilla_id);
-  if(!plant)throw new Error('No se encontró la plantilla. Abre el instrumento y verifica que tiene plantilla asignada.');
-  const ok=await ensureLibs();
-  if(!ok)throw new Error('No se pudieron cargar las librerías DOCX (PizZip / Docxtemplater). Verifica tu conexión a internet y recarga la página.');
+// ─── DIAGNÓSTICO Y GENERACIÓN DOCX ──────────────────────────────────────────
+// Extrae todas las variables {{var}} del XML interno del DOCX
+function getTemplateVars(b64){
+  try{
+    const raw=b64.includes(',')?b64.split(',')[1]:b64;
+    const bin=atob(raw);const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    const zip=new PizZip(bytes);
+    // Concatenar todos los archivos XML relevantes
+    let xml='';
+    const files=['word/document.xml','word/header1.xml','word/header2.xml','word/header3.xml',
+                  'word/footer1.xml','word/footer2.xml','word/footer3.xml'];
+    files.forEach(f=>{if(zip.files[f])xml+=zip.files[f].asText();});
+    // Normalizar: juntar runs fragmentados para detectar {{var}} partidas
+    const normalized=xml.replace(/<\/w:t><\/w:r>[\s\S]*?<w:r[^>]*><w:t[^>]*>/g,'');
+    const found=new Set();
+    let m;
+    // Variables simples: {{var}}
+    const re1=/\{\{([^{}#/][^{}]*?)\}\}/g;
+    while((m=re1.exec(normalized))!==null)found.add(m[1].trim());
+    // Loops: {{#var}} y {{/var}}
+    const re2=/\{\{[#/]([^{}]+)\}\}/g;
+    while((m=re2.exec(normalized))!==null)found.add('#'+m[1].trim());
+    return[...found];
+  }catch(e){return[];}
+}
 
+// Construye el objeto de datos SA → todos los valores garantizados como strings
+function buildDataSA(instr){
   const fp=parsF(instr.fecha_instrumento);
   const fpCud=parsF(instr.fecha_cud);
+  const s2=function(v){return(v===undefined||v===null)?'':String(v);};
+  const n2=function(v,dec){return(parseFloat(v)||0).toLocaleString('es-MX',{minimumFractionDigits:dec||0});};
 
-  const sociosData=(instr.socios||[]).map((s,i)=>({
-    nombre_completo:s.nombre_completo||'',
-    nacionalidad:s.nacionalidad||'mexicana',
-    nac_padres:s.nac_padres||'mexicanos',
-    lugar_nacimiento:s.lugar_nac||'',
-    fecha_nacimiento:s.fecha_nac||'',
-    fecha_nacimiento_letra:fechaL(s.fecha_nac||''),
-    estado_civil:ecG(s.estado_civil,s.genero),
-    genero:s.genero||'masculino',
-    profesion:s.profesion||'',
-    domicilio_completo:[s.dom_calle,s.dom_numero?'núm.'+s.dom_numero:'',s.dom_colonia?'Col.'+s.dom_colonia:'',s.dom_cp?'C.P.'+s.dom_cp:'',s.dom_ciudad,s.dom_estado].filter(Boolean).join(', '),
-    dom_calle:s.dom_calle||'',dom_numero:s.dom_numero||'',dom_colonia:s.dom_colonia||'',dom_cp:s.dom_cp||'',dom_ciudad:s.dom_ciudad||'',dom_estado:s.dom_estado||'',
-    tipo_identificacion:s.tipo_id||'Credencial para Votar',
-    autoridad_identificacion:s.aut_id||'',
-    clave_elector:s.clave_elector||'',clave_elector_letra:cL(s.clave_elector||''),
-    apendice:s.apendice||APD[i]||'D',
-    curp:s.curp||'',curp_letra:cL(s.curp||''),
-    rfc:s.rfc||'',rfc_letra:cL(s.rfc||''),
-    numero_acciones:(parseInt(s.num_acciones)||0).toString(),
-    numero_acciones_letra:numL(parseInt(s.num_acciones)||0)+((parseInt(s.num_acciones)||0)===1?' acción':' acciones'),
-    importe_acciones:(parseFloat(s.importe)||0).toLocaleString(),
-    importe_acciones_letra:monL(parseFloat(s.importe)||0),
-    texto_generales:s.texto_generales||genGen(s),
-  }));
+  const sociosData=(instr.socios||[]).map((s,idx)=>{
+    const domParts=[s.dom_calle,s.dom_numero?'núm. '+s.dom_numero:'',
+      s.dom_colonia?'Colonia '+s.dom_colonia:'',s.dom_cp?'C.P. '+s.dom_cp:'',
+      s.dom_ciudad,s.dom_estado].filter(Boolean);
+    const na=parseInt(s.num_acciones)||0;
+    const im=parseFloat(s.importe)||0;
+    const inciso_letters=['a','b','c','d','e','f','g','h','i','j'];
+    const inciso_LETTERS=['A','B','C','D','E','F','G','H','I','J'];
+    const esF=(s.genero==='femenino');
+    return{
+      nombre_completo:s2(s.nombre_completo),
+      genero:s2(s.genero)||'masculino',
+      // Tratamiento gramatical
+      tratamiento:esF?'señora':'señor',
+      el_la:esF?'la':'el',
+      al_la:esF?'a la':'al',
+      del_de_la:esF?'de la':'del',
+      inciso:inciso_letters[idx]||String(idx+1),
+      inciso_mayus:inciso_LETTERS[idx]||String(idx+1),
+      nacionalidad:s2(s.nacionalidad)||'mexicana',
+      nac_padres:s2(s.nac_padres)||'mexicanos',
+      lugar_nacimiento:s2(s.lugar_nac),lugar_nac:s2(s.lugar_nac),
+      fecha_nacimiento:s2(s.fecha_nac),fecha_nac:s2(s.fecha_nac),
+      fecha_nacimiento_letra:fechaL(s.fecha_nac||''),
+      estado_civil:ecG(s.estado_civil,s.genero),estado_civil_raw:s2(s.estado_civil),
+      profesion:s2(s.profesion),
+      domicilio_completo:domParts.join(', '),
+      dom_calle:s2(s.dom_calle),dom_numero:s2(s.dom_numero),dom_colonia:s2(s.dom_colonia),
+      dom_cp:s2(s.dom_cp),dom_ciudad:s2(s.dom_ciudad),dom_estado:s2(s.dom_estado),
+      tipo_identificacion:s2(s.tipo_id)||'Credencial para Votar',tipo_id:s2(s.tipo_id),
+      autoridad_identificacion:s2(s.aut_id)||'el Instituto Nacional Electoral',aut_id:s2(s.aut_id),
+      clave_elector:s2(s.clave_elector),clave_elector_letra:cL(s.clave_elector||''),
+      apendice:s2(s.apendice)||APD[idx]||'D',
+      curp:s2(s.curp),curp_letra:cL(s.curp||''),
+      rfc:s2(s.rfc),rfc_letra:cL(s.rfc||''),
+      numero_acciones:na.toString(),num_acciones:na.toString(),
+      numero_acciones_letra:numL(na)+(na===1?' acción':' acciones'),
+      importe_acciones:n2(im,2),importe:n2(im,2),
+      importe_acciones_letra:monL(im),
+      texto_generales:s2(s.texto_generales)||genGen(s),
+      generales:s2(s.texto_generales)||genGen(s),
+    };
+  });
 
-  const datos={
-    numero_instrumento:instr.numero_instrumento||'',
-    numero_volumen:instr.numero_volumen||'',
-    numero_folios:instr.numero_folios||'',
-    dia:fp.dia, mes:fp.mes, anio:fp.anio,
-    dia_letra:fp.diaL, mes_letra:fp.mesL, anio_letra:fp.anioL,
-    fecha_completa:fp.completa,
-    nombre_empresa:instr.nombre_empresa||'',
-    cud:instr.cud||'',
-    fecha_cud:fpCud.completa||instr.fecha_cud||'',
-    duracion_sociedad:instr.duracion_sociedad||'',
-    domicilio_social:instr.domicilio_social||'',
-    objeto_social:instr.objeto_social||'',
-    capital_minimo:(instr.capital_minimo||0).toLocaleString(),
-    capital_minimo_letra:instr.capital_minimo_letra||monL(instr.capital_minimo||0),
-    numero_acciones:(instr.numero_acciones||0).toString(),
-    numero_acciones_letra:instr.numero_acciones_letra||numL(instr.numero_acciones||0)+' acciones',
-    valor_nominal:(instr.valor_nominal||0).toLocaleString(),
-    valor_nominal_letra:instr.valor_nominal_letra||monL(instr.valor_nominal||0),
-    nombre_administrador:instr.nombre_administrador||'',
-    rfc_administrador:instr.rfc_administrador||'',
+  return{
+    numero_instrumento:s2(instr.numero_instrumento),
+    numero_volumen:s2(instr.numero_volumen),
+    numero_folios:s2(instr.numero_folios),
+    dia:s2(fp.dia),mes:s2(fp.mes),anio:s2(fp.anio),
+    dia_letra:s2(fp.diaL),mes_letra:s2(fp.mesL),anio_letra:s2(fp.anioL),
+    fecha_completa:s2(fp.completa),fecha_instrumento:s2(instr.fecha_instrumento),
+    nombre_empresa:s2(instr.nombre_empresa),empresa:s2(instr.nombre_empresa),
+    cud:s2(instr.cud),
+    cud_letra:cL(s2(instr.cud)),
+    fecha_cud:s2(fpCud.completa),fecha_cud_raw:s2(instr.fecha_cud),
+    duracion_sociedad:s2(instr.duracion_sociedad),
+    domicilio_social:s2(instr.domicilio_social),
+    objeto_social:s2(instr.objeto_social),
+    capital_minimo:n2(instr.capital_minimo,2),
+    capital_minimo_numero:s2(instr.capital_minimo),
+    capital_minimo_letra:s2(instr.capital_minimo_letra)||monL(instr.capital_minimo||0),
+    numero_acciones:s2(instr.numero_acciones),
+    numero_acciones_letra:s2(instr.numero_acciones_letra)||numL(instr.numero_acciones||0)+' acciones',
+    valor_nominal:n2(instr.valor_nominal,2),
+    valor_nominal_letra:s2(instr.valor_nominal_letra)||monL(instr.valor_nominal||0),
+    nombre_administrador:s2(instr.nombre_administrador),administrador:s2(instr.nombre_administrador),
+    rfc_administrador:s2(instr.rfc_administrador),
     rfc_administrador_letra:cL(instr.rfc_administrador||''),
-    nombre_comisario:instr.nombre_comisario||'',
-    rfc_comisario:instr.rfc_comisario||'',
+    nombre_comisario:s2(instr.nombre_comisario),comisario:s2(instr.nombre_comisario),
+    rfc_comisario:s2(instr.rfc_comisario),
     rfc_comisario_letra:cL(instr.rfc_comisario||''),
+    nombres_socios:(instr.socios||[]).map(s=>s2(s.nombre_completo)).filter(Boolean).join(', '),
+    // totales generales
+    total_acciones:s2(instr.numero_acciones),
+    total_acciones_letra:s2(instr.numero_acciones_letra)||numL(instr.numero_acciones||0)+' acciones',
+    total_capital_letra:s2(instr.capital_minimo_letra)||monL(instr.capital_minimo||0),
     socios:sociosData,
   };
+}
 
-  const b64=plant.data.includes(',')?plant.data.split(',')[1]:plant.data;
-  const bin=atob(b64);const bytes=new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
-  const zip=new PizZip(bytes);
-  const doc=new Docxtemplater(zip,{paragraphLoop:true});
-  try{doc.render(datos);}
-  catch(err){
-    if(err.properties?.errors?.length){const m=err.properties.errors.map(e=>e.properties?.explanation||e.message).filter(Boolean).join('; ');throw new Error(m||err.message);}
-    throw err;
+function buildDataPODER(instr){
+  const s2=v=>(v===undefined||v===null)?'':String(v);
+  const fp=parsF(instr.fecha_instrumento);
+  const cfg=getConfig();
+  function personaData(p,idx){
+    if(!p)return{};
+    const dom=[p.dom_calle,p.dom_numero?'núm. '+p.dom_numero:'',p.dom_colonia?'Colonia '+p.dom_colonia:'',p.dom_cp?'C.P. '+p.dom_cp:'',p.dom_ciudad,p.dom_estado].filter(Boolean).join(', ');
+    const esF=p.genero==='femenino';
+    return{
+      nombre_completo:s2(p.nombre_completo),genero:s2(p.genero)||'masculino',
+      tratamiento:esF?'señora':'señor',el_la:esF?'la':'el',al_la:esF?'a la':'al',del_de_la:esF?'de la':'del',
+      nacionalidad:s2(p.nacionalidad)||'mexicana',nac_padres:s2(p.nac_padres)||'mexicanos',
+      lugar_nacimiento:s2(p.lugar_nac),fecha_nacimiento_letra:fechaL(p.fecha_nac||''),
+      estado_civil:ecG(p.estado_civil,p.genero),profesion:s2(p.profesion),
+      domicilio_completo:dom,dom_calle:s2(p.dom_calle),dom_numero:s2(p.dom_numero),
+      dom_colonia:s2(p.dom_colonia),dom_cp:s2(p.dom_cp),dom_ciudad:s2(p.dom_ciudad),dom_estado:s2(p.dom_estado),
+      tipo_identificacion:s2(p.tipo_id)||'Credencial para Votar',
+      autoridad_identificacion:s2(p.aut_id)||'el Instituto Nacional Electoral',
+      clave_elector:s2(p.clave_elector),clave_elector_letra:cL(p.clave_elector||''),
+      apendice:s2(p.apendice)||APD[idx]||'D',
+      curp:s2(p.curp),curp_letra:cL(p.curp||''),
+      rfc:s2(p.rfc),rfc_letra:cL(p.rfc||''),
+      inciso:['a','b','c','d','e'][idx]||s2(idx+1),
+      inciso_mayus:['A','B','C','D','E'][idx]||s2(idx+1),
+      texto_generales:genGen(p),generales:genGen(p),
+    };
   }
-  return doc.getZip().generate({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',compression:'DEFLATE'});
+  const apod=instr.apoderado||{};
+  return{
+    numero_instrumento:s2(instr.numero_instrumento),numero_volumen:s2(instr.numero_volumen),numero_folios:s2(instr.numero_folios),
+    dia:s2(fp.dia),mes:s2(fp.mes),anio:s2(fp.anio),
+    dia_letra:s2(fp.diaL),mes_letra:s2(fp.mesL),anio_letra:s2(fp.anioL),fecha_completa:s2(fp.completa),
+    acto:s2(instr.acto)||'PODER GENERAL',
+    ciudad_estado:s2(instr.ciudad_estado)||cfg.ciudad_estado,
+    notario:s2(instr.notario)||cfg.notario,notaria:s2(instr.notaria)||cfg.notaria,
+    facultades:s2(instr.facultades),limitacion:s2(instr.limitacion),vigencia:s2(instr.vigencia)||'INDEFINIDA',
+    nombre_apoderado:s2(apod.nombre_completo),
+    curp_apoderado:s2(apod.curp),curp_apoderado_letra:cL(apod.curp||''),
+    rfc_apoderado:s2(apod.rfc),rfc_apoderado_letra:cL(apod.rfc||''),
+    domicilio_apoderado:[apod.dom_calle,apod.dom_numero,apod.dom_colonia,apod.dom_cp,apod.dom_ciudad,apod.dom_estado].filter(Boolean).join(', '),
+    nombres_otorgantes:(instr.otorgantes||[]).map(p=>s2(p.nombre_completo)).filter(Boolean).join(', '),
+    otorgantes:(instr.otorgantes||[]).map((p,i)=>personaData(p,i)),
+  };
+}
+
+function buildDataCOMPRAVENTA(instr){
+  const s2=v=>(v===undefined||v===null)?'':String(v);
+  const fp=parsF(instr.fecha_instrumento);
+  const cfg=getConfig();
+  function personaData(p){
+    if(!p)return{};
+    const esF=p.genero==='femenino';
+    const dom=[p.dom_calle,p.dom_numero?'núm. '+p.dom_numero:'',p.dom_colonia?'Colonia '+p.dom_colonia:'',p.dom_cp?'C.P. '+p.dom_cp:'',p.dom_ciudad,p.dom_estado].filter(Boolean).join(', ');
+    return{
+      nombre_completo:s2(p.nombre_completo),tratamiento:esF?'señora':'señor',el_la:esF?'la':'el',al_la:esF?'a la':'al',
+      nacionalidad:s2(p.nacionalidad)||'mexicana',lugar_nacimiento:s2(p.lugar_nac),
+      fecha_nacimiento_letra:fechaL(p.fecha_nac||''),estado_civil:ecG(p.estado_civil,p.genero),
+      profesion:s2(p.profesion),domicilio_completo:dom,
+      tipo_identificacion:s2(p.tipo_id)||'Credencial para Votar',
+      autoridad_identificacion:s2(p.aut_id)||'el Instituto Nacional Electoral',
+      clave_elector:s2(p.clave_elector),clave_elector_letra:cL(p.clave_elector||''),
+      curp:s2(p.curp),curp_letra:cL(p.curp||''),rfc:s2(p.rfc),rfc_letra:cL(p.rfc||''),
+      texto_generales:genGen(p),generales:genGen(p),
+    };
+  }
+  const vd=instr.vendedor||{},cp=instr.comprador||{},inm=instr.inmueble||{};
+  const vdData=personaData(vd),cpData=personaData(cp);
+  const merged={};
+  Object.keys(vdData).forEach(k=>merged['vendedor_'+k]=vdData[k]);
+  Object.keys(cpData).forEach(k=>merged['comprador_'+k]=cpData[k]);
+  const precio=parseFloat(instr.precio)||0;
+  return{
+    numero_instrumento:s2(instr.numero_instrumento),numero_volumen:s2(instr.numero_volumen),
+    dia:s2(fp.dia),mes:s2(fp.mes),anio:s2(fp.anio),
+    dia_letra:s2(fp.diaL),mes_letra:s2(fp.mesL),anio_letra:s2(fp.anioL),fecha_completa:s2(fp.completa),
+    ciudad_estado:s2(instr.ciudad_estado)||cfg.ciudad_estado,
+    notario:s2(instr.notario)||cfg.notario,notaria:s2(instr.notaria)||cfg.notaria,
+    nombre_vendedor:s2(vd.nombre_completo),nombre_comprador:s2(cp.nombre_completo),
+    descripcion_inmueble:s2(inm.descripcion),superficie:s2(inm.superficie),
+    ubicacion_inmueble:s2(inm.ubicacion),linderos:s2(inm.linderos),
+    precio:(precio||0).toLocaleString('es-MX',{minimumFractionDigits:2}),
+    precio_letra:s2(instr.precio_letra)||monL(precio),
+    forma_pago:s2(instr.forma_pago),
+    ...merged,
+  };
+}
+
+function buildDataOTRO(instr){
+  const s2=v=>(v===undefined||v===null)?'':String(v);
+  const fp=parsF(instr.fecha_instrumento);
+  const cfg=getConfig();
+  const base={
+    numero_instrumento:s2(instr.numero_instrumento),numero_volumen:s2(instr.numero_volumen),
+    titulo:s2(instr.titulo),dia:s2(fp.dia),mes:s2(fp.mes),anio:s2(fp.anio),
+    dia_letra:s2(fp.diaL),mes_letra:s2(fp.mesL),anio_letra:s2(fp.anioL),fecha_completa:s2(fp.completa),
+    ciudad_estado:s2(instr.ciudad_estado)||cfg.ciudad_estado,
+    notario:s2(instr.notario)||cfg.notario,notaria:s2(instr.notaria)||cfg.notaria,
+  };
+  const vals=instr.camposVal||{};
+  (instr.camposDef||[]).forEach(c=>{
+    const key=c.nombre||c._id;
+    let v=s2(vals[key]);
+    if(c.tipo==='date'&&v)v=fechaL(v);
+    base[key]=v;
+  });
+  return base;
+}
+
+async function buildDocx(instr,plant){
+  if(!plant)plant=DB.one('n_plant',instr.plantilla_id);
+  if(!plant)throw new Error('Plantilla no encontrada. Abre el instrumento y verifica que tiene plantilla asignada.');
+  if(!ensureLibs())throw new Error('Las librerías DOCX no están disponibles. Recarga la página.');
+
+  const buildFns={SA:buildDataSA,PODER:buildDataPODER,COMPRAVENTA:buildDataCOMPRAVENTA,OTRO:buildDataOTRO};
+  const datos=(buildFns[instr.tipo_instrumento||'SA']||buildDataSA)(instr);
+
+  // Decodificar base64 → Uint8Array
+  const b64=plant.data.includes(',')?plant.data.split(',')[1]:plant.data;
+  let bytes;
+  try{
+    const bin=atob(b64);
+    bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  }catch(e){throw new Error('Error al decodificar la plantilla. Vuelve a subirla.');}
+
+  let zip;
+  try{zip=new PizZip(bytes);}
+  catch(e){throw new Error('El archivo de plantilla no es un DOCX válido: '+e.message);}
+
+  // Docxtemplater v3: paragraphLoop para loops multi-párrafo
+  // NO usamos linebreaks:true ni nullGetter porque pueden causar problemas en algunas versiones
+  let doc;
+  try{
+    doc=new Docxtemplater(zip,{paragraphLoop:true});
+  }catch(e){throw new Error('Error al inicializar motor DOCX: '+e.message);}
+
+  try{
+    doc.render(datos);
+  }catch(err){
+    // Extraer explicación detallada de los errores de docxtemplater
+    const errs=(err.properties?.errors)||[];
+    if(errs.length){
+      const tags=errs.map(e=>e.properties?.tag||e.properties?.id||'').filter(Boolean);
+      const expl=errs.map(e=>e.properties?.explanation||e.message||'').filter(Boolean);
+      const detail=expl.length?expl.join(' | '):('Tags con error: '+tags.join(', '));
+      throw new Error('Error en sustitución — '+detail+
+        (tags.length?' | Verifica que {{'+tags[0]+'}} exista en el formulario':''));
+    }
+    throw new Error('Error al renderizar: '+(err.message||String(err)));
+  }
+
+  try{
+    return doc.getZip().generate({
+      type:'blob',
+      mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      compression:'DEFLATE'
+    });
+  }catch(e){throw new Error('Error al generar el archivo final: '+e.message);}
+}
+
+// Diagnóstico: muestra variables del template vs datos disponibles
+function showDiagnostic(plantId){
+  const plant=DB.one('n_plant',plantId);
+  if(!plant){toast('Plantilla no encontrada','err');return;}
+  const templateVars=getTemplateVars(plant.data);
+  const dataKeys=Object.keys(buildDataSA({})).concat(
+    ['socios[i].nombre_completo','socios[i].texto_generales','socios[i].curp',
+     'socios[i].rfc','socios[i].numero_acciones','socios[i].domicilio_completo',
+     'socios[i].fecha_nacimiento_letra','socios[i].estado_civil','socios[i].profesion',
+     'socios[i].nacionalidad','socios[i].tipo_identificacion','socios[i].apendice',
+     'socios[i].importe_acciones','socios[i].clave_elector']);
+
+  const simpleVars=templateVars.filter(v=>!v.startsWith('#'));
+  const loopVars=templateVars.filter(v=>v.startsWith('#'));
+
+  // Detectar cuáles NO están en nuestros datos
+  const flatKeys=Object.keys(buildDataSA({}));
+  const flatSocioKeys=['nombre_completo','texto_generales','generales','curp','curp_letra',
+    'rfc','rfc_letra','numero_acciones','num_acciones','numero_acciones_letra',
+    'importe_acciones','importe_acciones_letra','importe','domicilio_completo',
+    'fecha_nacimiento_letra','fecha_nacimiento','fecha_nac','estado_civil','profesion',
+    'nacionalidad','nac_padres','lugar_nacimiento','lugar_nac','genero',
+    'tipo_identificacion','tipo_id','autoridad_identificacion','aut_id',
+    'clave_elector','clave_elector_letra','apendice','dom_calle','dom_numero',
+    'dom_colonia','dom_cp','dom_ciudad','dom_estado','estado_civil_raw'];
+  const allKnown=new Set([...flatKeys,...flatSocioKeys]);
+  const unknown=simpleVars.filter(v=>!allKnown.has(v));
+
+  modal(`<div class="md p-6" style="max-width:700px">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold">🔍 Diagnóstico: ${plant.nombre}</h2>
+      <button onclick="cmodal()" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+    </div>
+    ${templateVars.length===0?`<div class="al al-e"><strong>⚠ No se detectaron variables en esta plantilla.</strong><br>
+      Verifica que tu documento Word usa <code>{{doble_llave}}</code> y no otro formato.
+      Word a veces fragmenta los textos — selecciona el placeholder completo en Word y re-escríbelo.</div>`:`
+    <div class="al al-i text-sm">Se detectaron <strong>${simpleVars.length}</strong> variable(s) y <strong>${loopVars.length}</strong> loop(s).</div>
+    ${unknown.length>0?`<div class="al al-e text-sm"><strong>⚠ Variables NO reconocidas por el sistema:</strong><br>
+      ${unknown.map(v=>`<code class="font-mono bg-red-50 px-1 rounded">{{${v}}}</code>`).join(' ')}
+      <br><br>Estas variables quedarán vacías o causarán error. Renómbralas en Word usando los nombres del catálogo (botón "Variables" en el formulario).</div>`:''}
+    <div class="g2" style="gap:12px;margin-top:12px">
+      <div>
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Variables simples encontradas</p>
+        <div style="max-height:280px;overflow-y:auto">
+        ${simpleVars.length?simpleVars.map(v=>`<div class="flex items-center gap-2 py-1 border-b border-gray-100 text-sm">
+          <span class="${allKnown.has(v)?'text-green-600':'text-red-500'} text-base">${allKnown.has(v)?'✓':'✗'}</span>
+          <code class="font-mono text-xs">${v}</code>
+        </div>`).join(''):'<p class="text-gray-400 text-sm">Ninguna</p>'}
+        </div>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Loops encontrados</p>
+        ${loopVars.length?loopVars.map(v=>`<div class="py-1 border-b border-gray-100 text-sm">
+          <code class="font-mono text-xs text-purple-700">${v.replace('#','{{#')}}}...{{/${v.slice(1)}}}</code>
+        </div>`).join(''):'<p class="text-gray-400 text-sm">Ninguno</p>'}
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 mt-4">Leyenda</p>
+        <div class="text-sm space-y-1">
+          <div class="flex gap-2"><span class="text-green-600">✓</span> Variable reconocida → se sustituirá</div>
+          <div class="flex gap-2"><span class="text-red-500">✗</span> Variable no reconocida → quedará vacía</div>
+        </div>
+      </div>
+    </div>`}
+    <div class="flex justify-end mt-4"><button onclick="cmodal()" class="btn bp">Cerrar</button></div>
+  </div>`);
 }
 
 function reDescargar(id){
   const i=DB.one('n_instr',id)||(F.instr?.id===id?F.instr:null);
   if(!i?.docx){toast('Sin documento generado aún','warn');return;}
   const a=document.createElement('a');a.href=i.docx;a.download='Instrumento_'+(i.numero_instrumento||'doc').replace(/[^a-zA-Z0-9]/g,'_')+'.docx';a.click();
+}
+
+// ─── TRANSCRIPCIONES ─────────────────────────────────────────────────────────
+let _tFile=null,_tResult='';
+function pgTranscripciones(){
+  const trans=DB.get('n_transcripciones');
+  document.getElementById('pacts').innerHTML='';
+  document.getElementById('content').innerHTML=`
+    <div class="card p-6 mb-4">
+      <h2 class="font-semibold text-gray-900 mb-3">Transcribir documento</h2>
+      <div class="al al-w text-sm mb-4">Requiere API key de Claude (Anthropic) en <button onclick="go('config')" class="text-blue-600 underline">Configuración</button>. Para PDF, el procesamiento puede tardar según el número de páginas.</div>
+      <div class="dz" id="tdz" onclick="document.getElementById('tfile').click()" ondragover="event.preventDefault();this.classList.add('dov')" ondragleave="this.classList.remove('dov')" ondrop="htdrop(event)">
+        <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+        <p class="text-gray-500 text-sm">Arrastra o <span class="text-blue-600">selecciona</span> un archivo PDF, JPG o PNG</p>
+        <p id="tname" class="text-xs text-blue-700 mt-1 font-medium"></p>
+      </div>
+      <input id="tfile" type="file" accept=".pdf,.jpg,.jpeg,.png" class="hidden" onchange="htfile(event)">
+      <div class="flex gap-3 mt-4">
+        <button onclick="iniciarTranscripcion()" class="btn bp" id="tbtn">Transcribir con Claude</button>
+        <button onclick="clearTranscripcion()" class="btn bs">Limpiar</button>
+      </div>
+    </div>
+    <div id="tres" class="hidden card p-6 mb-4">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="font-semibold text-gray-900">Resultado de la transcripción</h2>
+        <div class="flex gap-2">
+          <button onclick="descargarTranscripcionDocx()" class="btn bg">⬇ Descargar .docx</button>
+          <button onclick="guardarTranscripcion()" class="btn bp">💾 Guardar en historial</button>
+        </div>
+      </div>
+      <textarea id="ttxt" class="fta font-mono text-xs" rows="20" placeholder="Aquí aparecerá la transcripción..."></textarea>
+    </div>
+    <div class="card">
+      <div class="flex justify-between items-center px-5 py-4 border-b border-gray-200">
+        <h2 class="font-semibold text-gray-900">Historial de transcripciones</h2>
+        ${trans.length?`<span class="text-xs text-gray-500">${trans.length} documento(s)</span>`:''}
+      </div>
+      <div id="tlist">${renderTransList(trans)}</div>
+    </div>`;
+}
+function renderTransList(trans){
+  if(!trans.length)return`<div class="p-8 text-center text-gray-400 text-sm">Sin transcripciones guardadas</div>`;
+  return`<table class="w-full text-sm"><thead><tr class="text-left text-xs text-gray-500 border-b bg-gray-50"><th class="px-5 py-3">Archivo</th><th class="px-5 py-3">Fecha</th><th class="px-5 py-3">Páginas</th><th class="px-5 py-3"></th></tr></thead><tbody>
+  ${trans.map(t=>`<tr class="tr border-b border-gray-100">
+    <td class="px-5 py-3 font-medium">${t.nombre_archivo||'—'}</td>
+    <td class="px-5 py-3 text-gray-500">${(t.fecha||'').slice(0,10)}</td>
+    <td class="px-5 py-3 text-gray-500">${t.paginas||'—'}</td>
+    <td class="px-5 py-3 flex gap-2 justify-end">
+      <button onclick="verTranscripcion('${t.id}')" class="btn bs text-xs py-1 px-3">Ver</button>
+      ${t.docx?`<button onclick="dlTransDocx('${t.id}')" class="btn bc text-xs py-1 px-3">⬇ .docx</button>`:''}
+      <button onclick="delTrans('${t.id}')" class="btn bd text-xs py-1 px-2">✕</button>
+    </td>
+  </tr>`).join('')}</tbody></table>`;
+}
+function htdrop(e){e.preventDefault();document.getElementById('tdz').classList.remove('dov');const f=e.dataTransfer.files[0];if(f)setTfile(f);}
+function htfile(e){const f=e.target.files[0];if(f)setTfile(f);}
+function setTfile(f){
+  _tFile=f;_tResult='';
+  document.getElementById('tname').textContent=f.name+' ('+Math.round(f.size/1024)+' KB)';
+  document.getElementById('tres').classList.add('hidden');
+  document.getElementById('ttxt').value='';
+}
+function clearTranscripcion(){_tFile=null;_tResult='';document.getElementById('tname').textContent='';document.getElementById('tres').classList.add('hidden');document.getElementById('tfile').value='';}
+
+async function iniciarTranscripcion(){
+  if(!_tFile){toast('Selecciona un archivo primero','warn');return;}
+  const cfg=getConfig();
+  if(!cfg.api_key){errModal('API Key requerida','Configura tu API key de Anthropic en <b>Configuración → API key de Claude</b>.<br><br>La key tiene formato <code>sk-ant-...</code>');return;}
+  const btn=document.getElementById('tbtn');
+  btn.disabled=true;btn.innerHTML='<span class="sp"></span> Procesando...';
+  try{
+    let paginas=[];
+    if(_tFile.type==='application/pdf'){
+      toast('Convirtiendo PDF a imágenes...','info');
+      paginas=await pdfAImagenes(_tFile);
+    }else{
+      paginas=[await archivoABase64(_tFile)];
+    }
+    let texto='';
+    for(let i=0;i<paginas.length;i++){
+      toast(`Transcribiendo página ${i+1} de ${paginas.length}...`,'info');
+      const pg=await transcribirPagina(paginas[i],i+1,paginas.length,cfg.api_key);
+      texto+=`\n══ PÁGINA ${i+1} ══\n\n${pg}\n`;
+    }
+    _tResult=texto.trim();
+    document.getElementById('ttxt').value=_tResult;
+    document.getElementById('tres').classList.remove('hidden');
+    toast('Transcripción completada ✓');
+  }catch(e){errModal('Error en transcripción','<b>Detalle:</b> '+e.message+'<br><br>Verifica que tu API key sea correcta y que tengas saldo disponible.');}
+  finally{btn.disabled=false;btn.innerHTML='Transcribir con Claude';}
+}
+
+async function pdfAImagenes(file){
+  if(typeof pdfjsLib==='undefined')throw new Error('pdf.js no cargó. Recarga la página.');
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  const ab=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument(ab).promise;
+  const imgs=[];
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const vp=page.getViewport({scale:2});
+    const canvas=document.createElement('canvas');
+    canvas.width=vp.width;canvas.height=vp.height;
+    await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+    imgs.push({data:canvas.toDataURL('image/jpeg',0.85).split(',')[1],mimeType:'image/jpeg'});
+  }
+  return imgs;
+}
+function archivoABase64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=e=>res({data:e.target.result.split(',')[1],mimeType:file.type});
+    r.onerror=rej;r.readAsDataURL(file);
+  });
+}
+async function transcribirPagina(img,num,total,apiKey){
+  const prompt=`Eres un transcriptor de documentos jurídicos y notariales. Esta es la página ${num} de ${total}.\n\nREGLAS ABSOLUTAS:\n1. Transcribe EXACTAMENTE lo que ves. No corrijas ortografía, no reescribas, no interpretes.\n2. Respeta saltos de línea, párrafos, encabezados, espaciados, tablas.\n3. Si una palabra es ilegible, escribe [ilegible].\n4. Si es parcialmente legible: la parte legible + [ilegible]. Ejemplo: "Docu[ilegible]to".\n5. Prioridad: Fidelidad visual > Interpretación semántica.\n6. Al final agrega la sección "--- TEXTO NO RECONOCIDO ---" con los fragmentos dudosos.\n\nTranscribe el contenido completo de esta página.`;
+  const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'x-api-key':apiKey,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-opus-4-7',max_tokens:4096,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:img.mimeType,data:img.data}},{type:'text',text:prompt}]}]})
+  });
+  if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error(e.error?.message||'Error HTTP '+resp.status);}
+  const data=await resp.json();
+  return data.content?.[0]?.text||'';
+}
+
+function descargarTranscripcionDocx(){
+  const txt=document.getElementById('ttxt')?.value||'';
+  if(!txt){toast('Sin texto para exportar','warn');return;}
+  if(!ensureLibs()){toast('Librerías DOCX no disponibles','err');return;}
+  const blob=transcripcionToDocx(txt,_tFile?.name||'transcripcion');
+  dlBlob(blob,'Transcripcion_'+(_tFile?.name||'doc').replace(/\.[^.]+$/,'')+'_'+new Date().toISOString().slice(0,10)+'.docx');
+  toast('Descargando .docx ✓');
+}
+function transcripcionToDocx(texto,nombreArchivo){
+  const zip=new PizZip();
+  const lines=texto.split('\n');
+  let bodyXml='';
+  for(const line of lines){
+    const esc=escXml(line);
+    if(line.startsWith('══')){
+      bodyXml+=`<w:p><w:r><w:br w:type="page"/></w:r></w:p><w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:b/><w:color w:val="1E40AF"/></w:rPr><w:t>${esc}</w:t></w:r></w:p>`;
+    }else if(line.startsWith('---')){
+      bodyXml+=`<w:p><w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">${esc}</w:t></w:r></w:p>`;
+    }else if(line===''){
+      bodyXml+=`<w:p/>`;
+    }else{
+      bodyXml+=`<w:p><w:r><w:rPr><w:rFonts w:ascii="Courier New" w:hAnsi="Courier New" w:cs="Courier New"/><w:sz w:val="20"/></w:rPr><w:t xml:space="preserve">${esc}</w:t></w:r></w:p>`;
+    }
+  }
+  bodyXml+=`<w:sectPr/>`;
+  const ns='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+  zip.file('[Content_Types].xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`);
+  zip.file('_rels/.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`);
+  zip.file('word/_rels/document.xml.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>`);
+  zip.file('word/document.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ${ns} xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${bodyXml}</w:body></w:document>`);
+  return zip.generate({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',compression:'DEFLATE'});
+}
+function guardarTranscripcion(){
+  const txt=document.getElementById('ttxt')?.value||'';
+  if(!txt){toast('Sin texto para guardar','warn');return;}
+  const t={id:uid(),nombre_archivo:_tFile?.name||'sin nombre',fecha:new Date().toISOString(),texto:txt,paginas:(txt.match(/══ PÁGINA/g)||[]).length||1};
+  DB.save('n_transcripciones',t);toast('Guardado en historial ✓');
+  document.getElementById('tlist').innerHTML=renderTransList(DB.get('n_transcripciones'));
+}
+function verTranscripcion(id){
+  const t=DB.one('n_transcripciones',id);if(!t)return;
+  _tResult=t.texto;_tFile={name:t.nombre_archivo};
+  document.getElementById('ttxt').value=t.texto;
+  document.getElementById('tres').classList.remove('hidden');
+  document.getElementById('tres').scrollIntoView({behavior:'smooth'});
+}
+function dlTransDocx(id){const t=DB.one('n_transcripciones',id);if(!t)return;const blob=transcripcionToDocx(t.texto,t.nombre_archivo);dlBlob(blob,'Trans_'+t.nombre_archivo.replace(/\.[^.]+$/,'')+'.docx');}
+function delTrans(id){if(!confirm('¿Eliminar esta transcripción?'))return;DB.del('n_transcripciones',id);document.getElementById('tlist').innerHTML=renderTransList(DB.get('n_transcripciones'));}
+
+// ─── CONFIGURACIÓN ────────────────────────────────────────────────────────────
+function pgConfig(){
+  if(APP.u.role!=='ADMIN'){document.getElementById('content').innerHTML='<p class="text-gray-500 p-6">Solo el Administrador puede acceder a la configuración.</p>';return;}
+  const cfg=getConfig();
+  document.getElementById('pacts').innerHTML='';
+  document.getElementById('content').innerHTML=`
+    <div class="card p-6 mb-4">
+      <h2 class="font-semibold text-gray-900 mb-4">Datos de la Notaría</h2>
+      <div class="fg"><label class="fl r">Nombre del Notario</label><input id="cfg-notario" class="fi" value="${cfg.notario}"></div>
+      <div class="fg"><label class="fl r">Nombre completo de la Notaría</label><input id="cfg-notaria" class="fi" value="${cfg.notaria}"></div>
+      <div class="fg"><label class="fl r">Ciudad y Estado</label><input id="cfg-ciudad" class="fi" value="${cfg.ciudad_estado}"></div>
+      <button onclick="guardarConfig()" class="btn bp">💾 Guardar configuración</button>
+    </div>
+    <div class="card p-6 mb-4">
+      <h2 class="font-semibold text-gray-900 mb-2">API key de Claude (Anthropic)</h2>
+      <p class="text-sm text-gray-500 mb-4">Requerida para el módulo de Transcripción. La key se guarda en este navegador (localStorage). Formato: <code class="font-mono bg-gray-100 px-1">sk-ant-api03-...</code></p>
+      <div class="fg"><label class="fl">API Key</label><input id="cfg-apikey" class="fi font-mono text-sm" type="password" value="${cfg.api_key}" placeholder="sk-ant-api03-..."></div>
+      <button onclick="guardarApiKey()" class="btn bp">💾 Guardar API key</button>
+      ${cfg.api_key?`<button onclick="probarApiKey()" class="btn bs ml-2">🧪 Probar conexión</button>`:''}
+    </div>
+    <div class="card p-6">
+      <h2 class="font-semibold text-gray-900 mb-2">Respaldo de datos</h2>
+      <p class="text-sm text-gray-500 mb-4">Exporta todos los instrumentos, plantillas y transcripciones a un archivo JSON. Importa para restaurar datos en otro navegador.</p>
+      <div class="flex gap-3 flex-wrap">
+        <button onclick="exportDB()" class="btn bg">⬇ Exportar base de datos</button>
+        <button onclick="importDB()" class="btn bs">⬆ Importar respaldo</button>
+      </div>
+    </div>`;
+}
+function guardarConfig(){
+  const cfg=getConfig();
+  cfg.notario=document.getElementById('cfg-notario').value.trim();
+  cfg.notaria=document.getElementById('cfg-notaria').value.trim();
+  cfg.ciudad_estado=document.getElementById('cfg-ciudad').value.trim();
+  setConfig(cfg);toast('Configuración guardada ✓');
+}
+function guardarApiKey(){
+  const cfg=getConfig();
+  cfg.api_key=document.getElementById('cfg-apikey').value.trim();
+  setConfig(cfg);toast('API key guardada ✓');
+}
+async function probarApiKey(){
+  const cfg=getConfig();
+  if(!cfg.api_key){toast('Ingresa una API key primero','warn');return;}
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+      headers:{'x-api-key':cfg.api_key,'anthropic-version':'2023-06-01','content-type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'Hola'}]})});
+    if(r.ok)toast('✓ Conexión exitosa con Claude API');
+    else{const e=await r.json().catch(()=>({}));toast('Error: '+(e.error?.message||'HTTP '+r.status),'err');}
+  }catch(e){toast('Error de red: '+e.message,'err');}
+}
+function exportDB(){
+  const data={instr:DB.get('n_instr'),plant:DB.get('n_plant'),transcripciones:DB.get('n_transcripciones'),config:DB.obj('n_config'),exportado:new Date().toISOString(),version:'2.0'};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  dlBlob(blob,'notaria149_backup_'+new Date().toISOString().slice(0,10)+'.json');
+  toast('Base de datos exportada ✓');
+}
+function importDB(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{
+        const d=JSON.parse(ev.target.result);
+        if(!confirm('¿Importar backup del '+((d.exportado||'').slice(0,10)||'fecha desconocida')+'?\nEsto REEMPLAZARÁ instrumentos, plantillas y transcripciones actuales.'))return;
+        if(d.instr)DB.set('n_instr',d.instr);
+        if(d.plant)DB.set('n_plant',d.plant);
+        if(d.transcripciones)DB.set('n_transcripciones',d.transcripciones);
+        if(d.config)DB.set('n_config',d.config);
+        toast('Importación completada. Recarga la página para ver los cambios.');
+      }catch{toast('Archivo inválido o corrupto','err');}
+    };r.readAsText(f);
+  };inp.click();
 }
 
 // ─── USUARIOS ─────────────────────────────────────────────────────────────────
@@ -818,9 +1754,8 @@ async function chgPass(id){const p=document.getElementById('cp').value;if(!p||p.
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 async function init(){
-  // Intentar cargar librerías al arrancar
-  ensureLibs().then(ok=>{ if(!ok)toast('⚠ Sin conexión: las librerías DOCX no cargaron. Necesitas internet para generar documentos.','warn'); });
   await seedUsers();
+  if(!localStorage.getItem('n_transcripciones'))DB.set('n_transcripciones',[]);
   const sess=DB.obj('n_sess');
   if(sess){const user=DB.get('n_users').find(u=>u.id===sess.id&&u.active);if(user){APP.u=user;showApp();go('dashboard');return;}}
   document.getElementById('pg-login').classList.remove('hidden');
